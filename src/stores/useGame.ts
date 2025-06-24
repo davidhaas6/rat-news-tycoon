@@ -13,11 +13,11 @@ interface GameState {
 }
 
 interface GameActions {
+  // Derived Getters
+  monthlyCost: () => number
+  // Actions
   hireWriter(cost: number): void
   advance(dt: number): void
-  // --- Derived getters
-  monthlyCost: () => number
-  // --- Actions
   publishArticle: (draft: Omit<Article, 'id' | 'readership' | 'credibility' | 'relevance'>) => void
   researchTech: (techId: string) => void
   reset: () => void

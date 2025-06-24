@@ -8,17 +8,16 @@ import { useGameLoop } from './hooks/useGameLoop';
 export default function App() {
   useGameLoop();
   return (
-    <main className="w-[90vw] h-[100vh] grid grid-cols-1 md:grid-cols-3 gap-4">
+    <main className="grid grid-rows-[auto_1fr_auto] grid-cols-5 gap-2 w-screen h-dvh overflow-hidden">
       {/* <div className="w-full table"></div> */}
-      <PlaceholderPanel />
+
+      <div className="col-span-5"><PlaceholderPanel /></div>
+
       <FinancePanel />
-      <Screen />
+      <div className="col-span-3"><Screen /></div>
       <PlaceholderPanel />
-      <PlaceholderPanel />
-      <PlaceholderPanel />
-      <div className="bg-red-500 text-white p-4">
-  If Tailwind is working, this box should have a red background, white text, and padding.
-</div>
+
+      <div className="col-span-5"><PlaceholderPanel /></div>
 
     </main>
   );
