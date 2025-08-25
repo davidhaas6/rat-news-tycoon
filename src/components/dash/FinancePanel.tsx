@@ -4,22 +4,27 @@ export default function FinancePanel() {
   const cash = useGame(s => s.cash);
   const writers = useGame(s => s.writers);
   const hire = useGame(s => s.hireWriter);
-  const tick = useGame(s => s.tick)
   const reset = useGame(s => s.reset)
+  const writerCost = useGame(s => s.getHireWriterCost)()
+  const readers = useGame(s => s.subscribers)
+
+  const tick = useGame(s => s.tick) // lets the panel refresh with a new timestamp. figure out how to fix to avoid refreshes. could modularize the timestamp panel or smtn else
+  const timestamp = useGame(s => s.getTimeStamp)
 
   return (
-    <section className="rounded bg-stone-800 text-stone-100 p-4 border">
-      <h2 className="text-lg font-bold">Finance</h2>
-      <p>Cash: ${cash.toLocaleString()}</p>
-      <p>Tick: {tick.toLocaleString()}</p>
+    <section className="rounded bg-stone-800 text-stone-100 p-4 border h-full">
+      <h2 className="text-lg font-bold">Management</h2>
+      <p>{timestamp()}</p>
+      <p>{cash.toLocaleString()} Cheddar</p>
+      <p>{writers} rat employees</p>
+      <p>{readers} readers</p>
       <button
         className="mt-2 btn"
-        disabled={cash < 1000}
-        onClick={() => hire(1000)}
+        disabled={cash < writerCost}
+        onClick={() => hire()}
       >
-        Hire writer ($1 000)
+        Hire Rat <br/><small>({writerCost} Cheddar)</small>
       </button>
-      <p className="text-sm opacity-70 mt-1">Writers: {writers}</p>
       <button
         onClick={() => reset()}
       >

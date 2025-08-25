@@ -14,9 +14,11 @@ interface GameState {
 
 interface GameActions {
   // Derived Getters
-  monthlyCost: () => number
+  getTimeStamp: () => string
+  getMonthlyCost: () => number
+  getHireWriterCost: () => number;
   // Actions
-  hireWriter(cost: number): void
+  hireWriter(): void
   advance(dt: number): void
   publishArticle: (draft: Omit<Article, 'id' | 'readership' | 'credibility' | 'relevance'>) => void
   researchTech: (techId: string) => void
@@ -38,7 +40,7 @@ type Article = {
 }
 
 const INIT_STATE: GameState = {
-  cash: 10000,
+  cash: 1000,
   writers: 1,
   tick: 0,
   articles: {},
@@ -47,14 +49,19 @@ const INIT_STATE: GameState = {
   month: 0,
 }
 
-const COST_WRITER_MONTHLY = 5;
+const COST_WRITER_MONTHLY = 100;
+const COST_WRITER_INITIAL = 15;
 const COST_ARTICLE_PUBLISH = 5;
-const TICKS_PER_MONTH = 300;
+const TICKS_PER_MONTH = 150;
 
 export const useGame = create<GameState & GameActions>()(
   persist((set, get) => ({
     ...INIT_STATE,
-    hireWriter(cost: number) {
+    getHireWriterCost() {
+        return COST_WRITER_INITIAL
+    },
+    hireWriter() {
+      const cost = COST_WRITER_INITIAL;
       if (get().cash < cost) return;
       set(s => ({ cash: s.cash - cost, writers: s.writers + 1 }));
     },
@@ -65,8 +72,17 @@ export const useGame = create<GameState & GameActions>()(
         cash: start_of_month ? s.cash - s.writers * COST_WRITER_MONTHLY : s.cash
       }));
     },
-    monthlyCost() {
+    getMonthlyCost() {
       return get().writers * COST_WRITER_MONTHLY;
+    },
+    getTimeStamp() {
+         const TICKS_PER_DAY = TICKS_PER_MONTH / 30;
+         const DAYS_PER_YEAR = 12 * 30;
+         const tot_days = Math.floor(get().tick / TICKS_PER_DAY);
+         const y = Math.floor(tot_days / DAYS_PER_YEAR)+1;
+         const m = Math.floor((tot_days % DAYS_PER_YEAR) / 30) + 1;
+         const d = tot_days % 30 + 1;
+         return `Year ${y}, Month ${m}, Day ${d}`;
     },
     publishArticle(draft: Omit<Article, 'id' | 'readership' | 'credibility' | 'relevance'>) {
       const id = crypto.randomUUID();
