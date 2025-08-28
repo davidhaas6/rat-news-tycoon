@@ -12,7 +12,7 @@ export default function FinancePanel() {
   const timestamp = useGame(s => s.getTimeStamp)
 
   return (
-    <section className="rounded bg-stone-800 text-stone-100 p-4 border h-full">
+    <section className="rounded text-stone-100 p-4 border-4 h-full yellow-border">
       <h2 className="text-lg font-bold">Management</h2>
       <p>{timestamp()}</p>
       <p>{cash.toLocaleString()} Cheddar</p>

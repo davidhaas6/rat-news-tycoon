@@ -1,8 +1,39 @@
 @import "tailwindcss";
 
+
+
+:root {
+  --color1: #FBC62C;
+  --color3: #010100;
+  --color2: #faf6ee;
+
+
+  --golden-yellow: #fbc62c;
+  --deep-black: #010100;
+  --cream: #FFF4D5;
+  --dark-gray: #3E3E3E;
+  --brownish-gray: #5A5551;
+}
+
+
 #root {
   /* max-width: 1280px; */
   margin: 0 auto;
   /* padding: 2rem; */
   /* text-align: center; */
+}
+
+* {
+  background-color: var(--deep-black);
+}
+
+
+
+
+.yellow-border {
+  border-color: var(--golden-yellow);
+}
+
+.black-bg {
+  background-color: var(--deep-black);
 }

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { Article, DraftArticle } from '../types/article';
 
 interface GameState {
   cash: number
@@ -20,24 +21,11 @@ interface GameActions {
   // Actions
   hireWriter(): void
   advance(dt: number): void
-  publishArticle: (draft: Omit<Article, 'id' | 'readership' | 'credibility' | 'relevance'>) => void
+  publishArticle: (draft: DraftArticle) => void
   researchTech: (techId: string) => void
   reset: () => void
 }
 
-type Article = {
-  id: string
-  topic: string
-  type: 'entertainment' | 'listicle' | 'science' | 'breaking'
-  qualities: {
-    investigation: { aggregate: number; original: number; factCheck: number }
-    writing: { engagement: number; depth: number }
-    publishing: { editing: number; visuals: number }
-  }
-  readership: number
-  credibility: number
-  relevance: number
-}
 
 const INIT_STATE: GameState = {
   cash: 1000,
@@ -84,7 +72,7 @@ export const useGame = create<GameState & GameActions>()(
          const d = tot_days % 30 + 1;
          return `Year ${y}, Month ${m}, Day ${d}`;
     },
-    publishArticle(draft: Omit<Article, 'id' | 'readership' | 'credibility' | 'relevance'>) {
+    publishArticle(draft: DraftArticle) {
       const id = crypto.randomUUID();
       // const metrics = scoreArticle(draft)           // pure fn
       const metrics = { readership: 0, credibility: 0, relevance: 5 }
@@ -98,6 +86,7 @@ export const useGame = create<GameState & GameActions>()(
       // async: send to RNN backend
       // rnnApi.publish(draft).catch(rollback)
     },
+    
     researchTech(techId: string) {
       // TODO:
       console.log("need to implement researchtech!")
