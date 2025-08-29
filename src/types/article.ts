@@ -7,15 +7,18 @@ export type Qualities = {
   publishing: { editing: number; visuals: number };
 };
 
+export type Reception = {
+  readership: number;
+  // credibility: number;
+  // relevance: number;
+}
+
 export type Article = {
   id: string;
   topic: string;
-  category?: string;
   type: ArticleType;
   qualities: Qualities;
-  readership: number;
-  credibility: number;
-  relevance: number;
+  reception: Reception;
 };
 
 export type DraftArticle = Omit<Article, 'id' | 'readership' | 'credibility' | 'relevance'>;

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Article, DraftArticle } from '../types/article';
+import { scoreArticle } from '../sim/scoring';
 
 interface GameState {
   cash: number
@@ -74,8 +75,9 @@ export const useGame = create<GameState & GameActions>()(
     },
     publishArticle(draft: DraftArticle) {
       const id = crypto.randomUUID();
-      // const metrics = scoreArticle(draft)           // pure fn
-      const metrics = { readership: 0, credibility: 0, relevance: 5 }
+      console.log("Publishing article:", draft);
+      
+      const metrics = scoreArticle(draft)
       set(s => ({
         articles: {
           ...s.articles,

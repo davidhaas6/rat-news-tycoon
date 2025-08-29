@@ -2,7 +2,7 @@ import './App.css'
 
 import FinancePanel from './components/dash/FinancePanel';
 import PlaceholderPanel from './components/dash/PlaceholderPanel';
-import Screen from './components/Screen';
+import Screen from './components/dash/Screen';
 import { useGameLoop } from './hooks/useGameLoop';
 
 export default function App() {
@@ -16,7 +16,7 @@ export default function App() {
       <div className="order-1 md:order-none md:col-span-3"><Screen /></div>
       <div className="order-3 md:order-none"><PlaceholderPanel text='right panel' /></div>
 
-      <div className="order-4 col-span-full"><PlaceholderPanel text='Bottom' /></div>
+      {/* <div className="order-4 col-span-full"><PlaceholderPanel text='Bottom' /></div> */}
     </main>
 
   );
