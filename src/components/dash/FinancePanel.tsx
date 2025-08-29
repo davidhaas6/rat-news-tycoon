@@ -6,7 +6,10 @@ export default function FinancePanel() {
   const hire = useGame(s => s.hireWriter);
   const reset = useGame(s => s.reset)
   const writerCost = useGame(s => s.getHireWriterCost)()
-  const readers = useGame(s => s.subscribers)
+  const subscribers = useGame(s => s.subscribers)
+  const totalViews = useGame(s => s.getTotalViews)
+  const revenue = useGame(s => s.getMonthlyRevenue)
+  const costs = useGame(s => s.getMonthlyCost)
 
   const tick = useGame(s => s.tick) // lets the panel refresh with a new timestamp. figure out how to fix to avoid refreshes. could modularize the timestamp panel or smtn else
   const timestamp = useGame(s => s.getTimeStamp)
@@ -15,9 +18,13 @@ export default function FinancePanel() {
     <section className="rounded text-stone-100 p-4 border-4 h-full yellow-border">
       <h2 className="text-lg font-bold">Management</h2>
       <p>{timestamp()}</p>
-      <p>{cash.toLocaleString()} Cheddar</p>
+      <p>{Math.round(cash).toLocaleString()} Cheddar</p>
       <p>{writers} rat employees</p>
-      <p>{readers} readers</p>
+      <p>{Math.round(totalViews()).toLocaleString()} views</p>
+      <p>{subscribers} subscribers</p>
+      <p>Income: {Math.round(revenue()).toLocaleString()} Cheddar</p>
+      <p>Cost: {Math.round(costs()).toLocaleString()} Cheddar</p>
+
       <button
         className="mt-2 btn"
         disabled={cash < writerCost}

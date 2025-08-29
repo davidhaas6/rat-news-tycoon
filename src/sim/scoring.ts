@@ -1,4 +1,11 @@
-import type { Article, ArticleType, DraftArticle, Qualities } from '../types/article';
+import type { ArticleType, DraftArticle, Qualities, Reception } from '../types/article';
+
+// Gameplay constants for tuning
+const BASE_SUBSCRIBER_READERSHIP_RATIO = 0.1;
+const BONUS_SUBSCRIBER_READERSHIP_RATIO = 0.7;
+const MAX_POTENTIAL_AUDIENCE = 10000;
+const MAX_CONVERSION_RATE = 0.05;
+
 
 // Type for the Gaussian parameters { mean, sigma }
 type GaussianParams = { mean: number; sigma: number };
@@ -76,7 +83,7 @@ const sweetSpots: SweetSpots = {
   },
 };
 
-export function scoreArticle(draft: DraftArticle): Article['reception'] {
+function calculateArticleScore(draft: DraftArticle): number {
   const targets = sweetSpots[draft.type];
   const scores: Record<keyof Qualities, number> = {
     investigation: 0,
@@ -85,6 +92,8 @@ export function scoreArticle(draft: DraftArticle): Article['reception'] {
   };
 
   // Calculate a score (0-1) for each quality group based on Gaussian match
+  let cumulativeQualityScore = 0;
+  const numQualityGroups = Object.keys(targets).length;
   for (const groupKey in targets) {
     const group = groupKey as keyof Qualities;
     const qualities = targets[group];
@@ -102,14 +111,36 @@ export function scoreArticle(draft: DraftArticle): Article['reception'] {
     // Average the scores for the group
     if (qualityCount > 0) {
       scores[group] = groupScore / qualityCount;
+      cumulativeQualityScore += scores[group] / numQualityGroups;
     }
   }
 
   console.log(`[scoreArticle] Scores for ${draft.type} "${draft.topic}":`, scores);
-
-  // TODO: Use these scores to calculate final metrics
-  return { readership: 0};
+  return cumulativeQualityScore;
 }
+
+export function calculateReception(draft: DraftArticle, subscribers: number): Reception {
+  const score = calculateArticleScore(draft);
+  const max_audience = Math.max(subscribers*1.5, MAX_POTENTIAL_AUDIENCE);
+
+  // Viral readership grows quadratically with score
+  const viralReads = max_audience * score * score;
+
+  // Subscriber readership is a mix of base + score-driven bonus
+  const subscriberReads = subscribers * (BASE_SUBSCRIBER_READERSHIP_RATIO + score * BONUS_SUBSCRIBER_READERSHIP_RATIO);
+  
+  const readership = Math.round(subscriberReads + viralReads);
+
+  // New subscribers are a function of viral reads and a score-dependent conversion rate
+  const conversionRate = MAX_CONVERSION_RATE * score;
+  const newSubscribers = Math.round(viralReads * conversionRate);
+
+  return {
+    readership,
+    newSubscribers,
+  };
+}
+
 
 export function matchGaussian(v: number, mean: number, sigma: number, floor = 0.05) {
   const z = (v - mean) / Math.max(1e-6, sigma);

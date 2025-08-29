@@ -153,6 +153,7 @@ export default function PublishPanel({
       category: category.trim() === '' ? undefined : category.trim(),
       type,
       qualities: qualities as DraftArticle['qualities'],
+      status: 'draft'
     };
     onPublish(draft);
     onClose();
