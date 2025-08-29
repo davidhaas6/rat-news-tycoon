@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useGame } from '../stores/useGame';
+import {TICKS_PER_MONTH} from '../sim/constants';
+
 
 export default function Header() {
   const publicationName = useGame(s => s.publicationName);
@@ -29,7 +31,6 @@ export default function Header() {
   }, [editing]);
 
   // deadline ring computation (uses same constants as store)
-  const TICKS_PER_MONTH = 150;
   const progress = ((tick % TICKS_PER_MONTH) + TICKS_PER_MONTH) % TICKS_PER_MONTH / TICKS_PER_MONTH;
 
 

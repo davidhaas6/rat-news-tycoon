@@ -2,17 +2,16 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Article, DraftArticle } from '../types/article';
 import { calculateReception } from '../sim/scoring';
+import { DAYS_PER_MONTH, PUBLISH_DUR_TICKS, TICKS_PER_MONTH, TICKS_PER_DAY } from '../sim/constants';
 
 interface GameState {
   cash: number
   writers: number
   tick: number
-
   articles: Record<string, Article>
   researchPts: number
   subscribers: number
   month: number
-
   publicationName: string
   tickSpeed: number
   paused: boolean
@@ -62,10 +61,6 @@ const COST_WRITER_INITIAL = 100;
 const COST_ARTICLE_PUBLISH = 20;
 const REVENUE_SUBSCRIPTION = 1;
 const REVENUE_VIEWS = 0.005;
-
-const TICKS_PER_MONTH = 150;
-const DAYS_PER_MONTH = 30;
-const PUBLISH_DUR_TICKS = TICKS_PER_MONTH / (DAYS_PER_MONTH / 2);
 
 export const useGame = create<GameState & GameActions>()(
   persist((set, get) => ({
@@ -136,7 +131,6 @@ export const useGame = create<GameState & GameActions>()(
         const viewRevenue = newViews * REVENUE_VIEWS;
 
         // Prorated revenue for new subscriptions
-        const TICKS_PER_DAY = TICKS_PER_MONTH / DAYS_PER_MONTH;
         const ticksIntoMonth = newTick % TICKS_PER_MONTH;
         const dayOfMonth = Math.floor(ticksIntoMonth / TICKS_PER_DAY); // 0-indexed day
         const prorateFactor = (DAYS_PER_MONTH - dayOfMonth) / DAYS_PER_MONTH;
@@ -156,7 +150,6 @@ export const useGame = create<GameState & GameActions>()(
       return get().writers * COST_WRITER_MONTHLY;
     },
     getTimeStamp() {
-      const TICKS_PER_DAY = TICKS_PER_MONTH / DAYS_PER_MONTH;
       const DAYS_PER_YEAR = 12 * DAYS_PER_MONTH;
       const tot_days = Math.floor(get().tick / TICKS_PER_DAY);
       const y = Math.floor(tot_days / DAYS_PER_YEAR) + 1;
