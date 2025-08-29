@@ -63,11 +63,11 @@ export default function Header() {
       <div className="w-full flex items-center justify-between gap-4">
         {/* Left */}
         <div className="flex items-center gap-3">
-          <img src="/favicon/favicon-32x32.png" alt="Rat" className="w-7 h-7" />
+          <img src="/favicon/favicon-96x96.png" alt="Rat" className="w-10 h-10" />
           <div className="min-w-[120px]">
             {!editing ? (
               <div
-                className="text-lg font-bold cursor-text select-none"
+                className="text-2xl font-bold cursor-text select-none"
                 role="button"
                 tabIndex={0}
                 onClick={() => {

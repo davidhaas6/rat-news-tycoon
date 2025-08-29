@@ -180,7 +180,7 @@ export default function RightStatusPanel() {
   }
 
   return (
-    <aside className="h-full bg-stone-900 text-stone-100 p-4 flex flex-col">
+    <aside className="h-full bg-stone-900 text-stone-100 p-4 flex flex-col rounded-lg mx-4 md:ml-0">
       {/* Top header with compact label at top-right by request — we'll show a short hint */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold">Articles</h3>

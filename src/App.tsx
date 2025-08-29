@@ -10,7 +10,7 @@ import RightStatusPanel from './components/RightStatusPanel';
 export default function App() {
   useGameLoop();
   return (
-    <main className="grid grid-cols-1 md:grid-cols-5 grid-rows-[auto_1fr_auto] gap-2 w-screen h-dvh overflow-y-auto">
+    <main className="grid grid-cols-1 gap-4 md:grid-cols-5 grid-rows-[auto_1fr_auto] w-screen h-dvh overflow-y-auto">
       <div className="col-span-full"><Header /></div>
 
       {/* middle row → re-orders on small screens */}

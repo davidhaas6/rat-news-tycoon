@@ -51,7 +51,7 @@ const INIT_STATE: GameState = {
   subscribers: 0,
   month: 0,
 
-  publicationName: "Rat News",
+  publicationName: "Rat News Corp",
   tickSpeed: 1,
   paused: false,
 }
