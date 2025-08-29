@@ -124,7 +124,8 @@ export function calculateReception(draft: DraftArticle, subscribers: number): Re
   const max_audience = Math.max(subscribers*1.5, MAX_POTENTIAL_AUDIENCE);
 
   // Viral readership grows quadratically with score
-  const viralReads = max_audience * score * score;
+  let viralReads = max_audience * score * score;
+  viralReads *= 1 + (Math.random() - 0.5) / 5;
 
   // Subscriber readership is a mix of base + score-driven bonus
   const subscriberReads = subscribers * (BASE_SUBSCRIBER_READERSHIP_RATIO + score * BONUS_SUBSCRIBER_READERSHIP_RATIO);

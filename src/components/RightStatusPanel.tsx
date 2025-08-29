@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useGame } from '../stores/useGame';
 import type { Article } from '../types/article';
 import { PUBLISH_DUR_TICKS, TICKS_PER_DAY } from '../sim/constants';
+import { createNoise2D } from 'simplex-noise';
 
 
 /**
@@ -154,7 +155,7 @@ export default function RightStatusPanel() {
   // Keep track of expanded state per-article. Start compact by default -> expanded=false.
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
-  const articleList = useMemo(() => Object.values(articlesRecord || {}), [articlesRecord]);
+  const articleList = useMemo(() => Object.values(articlesRecord || {}).reverse(), [articlesRecord]);
 
   const queue = useMemo(
     () => articleList.filter((a) => a.status === 'pending'),
@@ -169,10 +170,14 @@ export default function RightStatusPanel() {
     setExpanded((s) => ({ ...s, [id]: !s[id] }));
   }
 
+  const noiseR = useMemo(() => createNoise2D(() => 1), []);
+  const noiseS = useMemo(() => createNoise2D(() => 2), []);
+
   function projectedFromReception(readership: number, newSubscribers: number) {
     // small random offset for preview. Keep within reasonable bounds.
-    const rOffset = Math.floor(Math.random() * 400) - 50; // -50..+349
-    const sOffset = Math.floor(Math.random() * 12) - 2; // -2..+9
+    const randLoc = Math.floor(tick/4)
+    const rOffset = Math.floor(readership * (noiseR(randLoc / 100, 0)) * 0.25);
+    const sOffset = Math.floor(newSubscribers * (noiseS(randLoc / 50, 0)) * 0.5);
     return {
       readers: Math.max(0, readership + rOffset),
       subs: Math.max(0, newSubscribers + sOffset),
@@ -297,45 +302,45 @@ export default function RightStatusPanel() {
                     </div>
                   </div>
 
-          <MiniEffortBars qualities={item.qualities} />
+                  <MiniEffortBars qualities={item.qualities} />
 
-          <div className="mt-3 flex items-center gap-4 text-sm text-stone-300">
-            <div className="flex items-center gap-2">
-              <span className="text-amber-300">👁</span>
-              <span>{formatNumber(item.reception.readership)}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-amber-300">⭐</span>
-              <span>{formatNumber(item.reception.newSubscribers)}</span>
-            </div>
-          </div>
+                  <div className="mt-3 flex items-center gap-4 text-sm text-stone-300">
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-300">👁</span>
+                      <span>{formatNumber(item.reception.readership)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-300">⭐</span>
+                      <span>{formatNumber(item.reception.newSubscribers)}</span>
+                    </div>
+                  </div>
 
-          {isExpanded && (
-            <>
-              <div className="mt-2 flex flex-wrap">
-                {/* very small insight heuristics: extreme qualities */}
-                {(() => {
-                  const insights: string[] = [];
-                  const inv =
-                    item.qualities.investigation.background +
-                    item.qualities.investigation.original +
-                    item.qualities.investigation.factCheck;
-                  const w =
-                    item.qualities.writing.engagement + item.qualities.writing.depth;
-                  const p =
-                    item.qualities.publishing.editing + item.qualities.publishing.visuals;
-                  const total = inv + w + p || 1;
-                  if (w / total > 0.5) insights.push('High engagement');
-                  if (p / total < 0.2) insights.push('Light visuals');
-                  if (inv / total > 0.6) insights.push('Thorough reporting');
-                  return insights.map((t) => <InsightTag key={t} text={t} />);
-                })()}
-              </div>
-              <div className="mt-3">
-                <EffortBars qualities={item.qualities} />
-              </div>
-            </>
-          )}
+                  {isExpanded && (
+                    <>
+                      <div className="mt-2 flex flex-wrap">
+                        {/* very small insight heuristics: extreme qualities */}
+                        {(() => {
+                          const insights: string[] = [];
+                          const inv =
+                            item.qualities.investigation.background +
+                            item.qualities.investigation.original +
+                            item.qualities.investigation.factCheck;
+                          const w =
+                            item.qualities.writing.engagement + item.qualities.writing.depth;
+                          const p =
+                            item.qualities.publishing.editing + item.qualities.publishing.visuals;
+                          const total = inv + w + p || 1;
+                          if (w / total > 0.5) insights.push('High engagement');
+                          if (p / total < 0.2) insights.push('Light visuals');
+                          if (inv / total > 0.6) insights.push('Thorough reporting');
+                          return insights.map((t) => <InsightTag key={t} text={t} />);
+                        })()}
+                      </div>
+                      <div className="mt-3">
+                        <EffortBars qualities={item.qualities} />
+                      </div>
+                    </>
+                  )}
                 </div>
               );
             })}
