@@ -42,7 +42,7 @@ export default function SliderRow({
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full accent-yellow-400"
+          className="w-full accent-amber-400 w-full h-2 cursor-pointer"
         />
         <input
           aria-label={`${label} value`}

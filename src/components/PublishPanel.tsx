@@ -14,17 +14,17 @@ const sliderGroups = [
     key: 'investigation',
     label: 'Investigate',
     sliders: [
-      { key: 'aggregate', label: 'Aggregate' },
-      { key: 'original', label: 'Original' },
-      { key: 'factCheck', label: 'Fact-check' },
+      { key: 'background', label: 'Background Research' },
+      { key: 'original', label: 'Original Reporting' },
+      { key: 'factCheck', label: 'Fact-checking' },
     ],
   },
   {
     key: 'writing',
     label: 'Write',
     sliders: [
-      { key: 'engagement', label: 'Engagement' },
-      { key: 'depth', label: 'Depth' },
+      { key: 'engagement', label: 'Engagement & Style' },
+      { key: 'depth', label: 'Depth & Insight' },
     ],
   },
   {
@@ -32,7 +32,7 @@ const sliderGroups = [
     label: 'Publish',
     sliders: [
       { key: 'editing', label: 'Editing' },
-      { key: 'visuals', label: 'Visuals' },
+      { key: 'visuals', label: 'Visuals & Design' },
     ],
   },
 ];
@@ -236,17 +236,18 @@ export default function PublishPanel({
 
         <div className="mt-4 space-y-3">
           {sliderGroups.map((group) => (
-            <React.Fragment key={group.key}>
+            <div key={group.key} className='flex flex-col gap-2'>
+              <p className="text-xl text-stone-300 font-semibold">{group.label}</p>
               {group.sliders.map((slider) => (
                 <SliderRow
                   key={slider.key}
                   id={`${group.key}-${slider.key}`}
-                  label={`${group.label} — ${slider.label}`}
+                  label={`${slider.label}`}
                   value={qualities[group.key]?.[slider.key] ?? 0}
                   onChange={(v) => setSliderValue(group.key, slider.key, v)}
                 />
               ))}
-            </React.Fragment>
+            </div>
           ))}
         </div>
 

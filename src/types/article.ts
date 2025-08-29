@@ -2,7 +2,7 @@ export const ARTICLE_TYPES = ['entertainment', 'listicle', 'science', 'breaking'
 export type ArticleType = typeof ARTICLE_TYPES[number];
 
 export type Qualities = {
-  investigation: { aggregate: number; original: number; factCheck: number };
+  investigation: { background: number; original: number; factCheck: number };
   writing: { engagement: number; depth: number };
   publishing: { editing: number; visuals: number };
 };
