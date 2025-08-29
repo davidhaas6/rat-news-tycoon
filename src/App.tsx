@@ -2,6 +2,7 @@ import './App.css'
 
 import FinancePanel from './components/dash/FinancePanel';
 import PlaceholderPanel from './components/dash/PlaceholderPanel';
+import Header from './components/Header';
 import Screen from './components/dash/Screen';
 import { useGameLoop } from './hooks/useGameLoop';
 
@@ -9,7 +10,7 @@ export default function App() {
   useGameLoop();
   return (
     <main className="grid grid-cols-1 md:grid-cols-5 grid-rows-[auto_1fr_auto] gap-2 w-screen h-dvh overflow-hidden">
-      <div className="col-span-full"><PlaceholderPanel text='top panel' /></div>
+      <div className="col-span-full"><Header /></div>
 
       {/* middle row → re-orders on small screens */}
       <div className="order-2 md:order-none"><FinancePanel /></div>

@@ -12,6 +12,10 @@ interface GameState {
   researchPts: number
   subscribers: number
   month: number
+
+  publicationName: string
+  tickSpeed: number
+  paused: boolean
 }
 
 interface GameActions {
@@ -30,6 +34,12 @@ interface GameActions {
   publishArticle: (draft: DraftArticle) => void
   researchTech: (techId: string) => void
   reset: () => void
+
+  // UI / Controls
+  setPublicationName: (name: string) => void
+  setTickSpeed: (speed: number) => void
+  setPaused: (flag: boolean) => void
+  togglePaused: () => void
 }
 
 
@@ -41,6 +51,10 @@ const INIT_STATE: GameState = {
   researchPts: 0,
   subscribers: 0,
   month: 0,
+
+  publicationName: "Rat News",
+  tickSpeed: 1,
+  paused: false,
 }
 
 const COST_WRITER_MONTHLY = 300;
@@ -56,6 +70,18 @@ const PUBLISH_DUR_TICKS = TICKS_PER_MONTH / (DAYS_PER_MONTH / 2);
 export const useGame = create<GameState & GameActions>()(
   persist((set, get) => ({
     ...INIT_STATE,
+    setPublicationName(name: string) {
+      set({ publicationName: name });
+    },
+    setTickSpeed(speed: number) {
+      set({ tickSpeed: speed });
+    },
+    setPaused(flag: boolean) {
+      set({ paused: flag });
+    },
+    togglePaused() {
+      set(s => ({ paused: !s.paused }));
+    },
     getHireWriterCost() {
       return COST_WRITER_INITIAL
     },
@@ -115,8 +141,6 @@ export const useGame = create<GameState & GameActions>()(
         const dayOfMonth = Math.floor(ticksIntoMonth / TICKS_PER_DAY); // 0-indexed day
         const prorateFactor = (DAYS_PER_MONTH - dayOfMonth) / DAYS_PER_MONTH;
         const newSubRevenue = newSubs * REVENUE_SUBSCRIPTION * prorateFactor;
-        console.log("day", dayOfMonth)
-        console.log("tick", newTick)
 
         return {
           tick: newTick,

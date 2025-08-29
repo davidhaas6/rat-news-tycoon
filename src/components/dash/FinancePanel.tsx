@@ -19,7 +19,6 @@ export default function FinancePanel() {
       <header className="mb-3">
         <div className="flex items-baseline justify-between">
           <h2 className="text-lg font-bold">Management</h2>
-          <small className="text-sm text-stone-300">{timestamp()}</small>
         </div>
       </header>
 
