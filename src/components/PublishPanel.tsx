@@ -1,19 +1,66 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import SliderRow from './SliderRow';
-import type { DraftArticle, ArticleType } from '../types/article';
-
+import { ARTICLE_TYPES, type DraftArticle, type ArticleType } from '../types/article';
 
 interface PublishPanelProps {
   onPublish: (draft: DraftArticle) => void;
   onClose: () => void;
-  maxTotal?: number;
+}
+
+type QualityScores = Record<string, Record<string, number>>;
+
+const sliderGroups = [
+  {
+    key: 'investigation',
+    label: 'Investigate',
+    sliders: [
+      { key: 'aggregate', label: 'Aggregate' },
+      { key: 'original', label: 'Original' },
+      { key: 'factCheck', label: 'Fact-check' },
+    ],
+  },
+  {
+    key: 'writing',
+    label: 'Write',
+    sliders: [
+      { key: 'engagement', label: 'Engagement' },
+      { key: 'depth', label: 'Depth' },
+    ],
+  },
+  {
+    key: 'publishing',
+    label: 'Publish',
+    sliders: [
+      { key: 'editing', label: 'Editing' },
+      { key: 'visuals', label: 'Visuals' },
+    ],
+  },
+];
+
+function getInitialQualities(): QualityScores {
+  const qualities: QualityScores = {};
+  for (const group of sliderGroups) {
+    qualities[group.key] = {};
+    const numSliders = group.sliders.length;
+    const baseValue = Math.floor(100 / numSliders);
+    let remainder = 100 % numSliders;
+    for (const slider of group.sliders) {
+      let value = baseValue;
+      if (remainder > 0) {
+        value++;
+        remainder--;
+      }
+      qualities[group.key][slider.key] = value;
+    }
+  }
+  return qualities;
 }
 
 /**
  * PublishPanel
  *
  * Controlled inputs with live character counters.
- * Sliders 0-100 each. Total effort cannot exceed `maxTotal` (default 300).
+ * Sliders in each group must sum to 100.
  *
  * Keyboard:
  * - Esc: cancel / onClose
@@ -22,27 +69,19 @@ interface PublishPanelProps {
 export default function PublishPanel({
   onPublish,
   onClose,
-  maxTotal = 300,
 }: PublishPanelProps) {
   const [topic, setTopic] = useState('');
   const [category, setCategory] = useState('');
   const [type, setType] = useState<ArticleType>('entertainment');
 
-  const initialSliders = {
-    'investigation.aggregate': 30,
-    'investigation.original': 30,
-    'investigation.factCheck': 20,
-    'writing.engagement': 40,
-    'writing.depth': 40,
-    'publishing.editing': 40,
-    'publishing.visuals': 40,
-  };
+  const [qualities, setQualities] = useState<QualityScores>(getInitialQualities());
 
-  const [sliders, setSliders] = useState<Record<string, number>>(initialSliders);
-
-  const keys = useMemo(() => Object.keys(initialSliders), []);
-
-  const total = useMemo(() => Object.values(sliders).reduce((a, b) => a + b, 0), [sliders]);
+  const total = useMemo(() => {
+    return Object.values(qualities).reduce(
+      (total, group) => total + Object.values(group).reduce((a, b) => a + b, 0),
+      0
+    );
+  }, [qualities]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -50,8 +89,6 @@ export default function PublishPanel({
         e.preventDefault();
         onClose();
       } else if (e.key === 'Enter') {
-        // Prevent accidental submits when typing in inputs if they want Enter to insert newline.
-        // Submit only when focus is not in a multi-line field (we have none) and form valid.
         e.preventDefault();
         if (canSubmit) handleSubmit();
       }
@@ -59,21 +96,54 @@ export default function PublishPanel({
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [topic, category, type, sliders]);
+  }, [topic, category, type, qualities]);
 
   const canSubmit = topic.trim().length > 0 && topic.trim().length <= 30;
 
-  function clampSliderForTotal(key: string, requested: number) {
-    const current = sliders[key] ?? 0;
-    const othersTotal = total - current;
-    const maxForThis = Math.max(0, maxTotal - othersTotal);
-    const clamped = Math.max(0, Math.min(requested, 100, maxForThis));
-    return clamped;
-  }
+  function setSliderValue(groupKey: string, sliderKey: string, newValue: number) {
+    setQualities(prevQualities => {
+      const newQualities = JSON.parse(JSON.stringify(prevQualities));
+      const group = newQualities[groupKey];
+      const sliderKeys = Object.keys(group);
+      const currentIndex = sliderKeys.indexOf(sliderKey);
+      const currentValue = group[sliderKey];
 
-  function setSlider(key: string, value: number) {
-    const v = clampSliderForTotal(key, value);
-    setSliders(s => ({ ...s, [key]: v }));
+      newValue = Math.max(0, Math.min(100, newValue));
+      let diff = newValue - currentValue;
+
+      if (diff === 0) {
+        return prevQualities;
+      }
+
+      group[sliderKey] = newValue;
+
+      const slidersToAdjust = sliderKeys.slice(currentIndex + 1).concat(sliderKeys.slice(0, currentIndex));
+
+      for (const key of slidersToAdjust) {
+        if (diff === 0) break;
+        const valueToAdjust = group[key];
+
+        if (diff > 0) { // We need to decrease other sliders
+          const canDecreaseBy = valueToAdjust;
+          const decreaseBy = Math.min(diff, canDecreaseBy);
+          group[key] -= decreaseBy;
+          diff -= decreaseBy;
+        } else { // We need to increase other sliders
+          const canIncreaseBy = 100 - valueToAdjust;
+          const increaseBy = Math.min(-diff, canIncreaseBy);
+          group[key] += increaseBy;
+          diff += increaseBy;
+        }
+      }
+
+      // If there's still a difference (e.g. all other sliders are at their limits),
+      // adjust the original slider back.
+      if (diff !== 0) {
+        group[sliderKey] -= diff;
+      }
+
+      return newQualities;
+    });
   }
 
   function handleSubmit() {
@@ -82,21 +152,7 @@ export default function PublishPanel({
       topic: topic.trim(),
       category: category.trim() === '' ? undefined : category.trim(),
       type,
-      qualities: {
-        investigation: {
-          aggregate: sliders['investigation.aggregate'],
-          original: sliders['investigation.original'],
-          factCheck: sliders['investigation.factCheck'],
-        },
-        writing: {
-          engagement: sliders['writing.engagement'],
-          depth: sliders['writing.depth'],
-        },
-        publishing: {
-          editing: sliders['publishing.editing'],
-          visuals: sliders['publishing.visuals'],
-        },
-      },
+      qualities: qualities as DraftArticle['qualities'],
     };
     onPublish(draft);
     onClose();
@@ -112,7 +168,7 @@ export default function PublishPanel({
         <div className="flex items-start justify-between gap-4">
           <h3 className="text-lg font-bold">New Article</h3>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-stone-300">Effort used: {total}/{maxTotal}</span>
+            <span className="text-sm text-stone-300">Effort used: {total}/300</span>
             <button
               onClick={onClose}
               className="text-stone-300 hover:text-white px-2 py-1 rounded"
@@ -155,64 +211,43 @@ export default function PublishPanel({
 
           <div className="sm:col-span-2">
             <label className="text-sm text-stone-300">Type</label>
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value as ArticleType)}
-              className="w-full mt-1 px-2 py-2 bg-stone-800 border border-stone-700 rounded text-stone-100"
-            >
-              <option value="entertainment">Entertainment</option>
-              <option value="listicle">Listicle</option>
-              <option value="science">Science</option>
-              <option value="breaking">Breaking</option>
-            </select>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {ARTICLE_TYPES.map((item) => {
+                const variants = {
+                  selected: '!bg-amber-400 !text-black font-semibold',
+                  default: 'bg-stone-800 hover:bg-stone-700 text-stone-300',
+                };
+                const variant = type === item ? 'selected' : 'default';
+
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setType(item)}
+                    className={`px-3 py-1.5 text-sm rounded-md transition-colors ${variants[variant]}`}
+                  >
+                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
         <div className="mt-4 space-y-3">
-          <SliderRow
-            id="invest-agg"
-            label="Investigate — Aggregate"
-            value={sliders['investigation.aggregate']}
-            onChange={(v) => setSlider('investigation.aggregate', v)}
-          />
-          <SliderRow
-            id="invest-orig"
-            label="Investigate — Original"
-            value={sliders['investigation.original']}
-            onChange={(v) => setSlider('investigation.original', v)}
-          />
-          <SliderRow
-            id="invest-fc"
-            label="Investigate — Fact-check"
-            value={sliders['investigation.factCheck']}
-            onChange={(v) => setSlider('investigation.factCheck', v)}
-          />
-
-          <SliderRow
-            id="write-eng"
-            label="Write — Engagement"
-            value={sliders['writing.engagement']}
-            onChange={(v) => setSlider('writing.engagement', v)}
-          />
-          <SliderRow
-            id="write-depth"
-            label="Write — Depth"
-            value={sliders['writing.depth']}
-            onChange={(v) => setSlider('writing.depth', v)}
-          />
-
-          <SliderRow
-            id="pub-edit"
-            label="Publish — Editing"
-            value={sliders['publishing.editing']}
-            onChange={(v) => setSlider('publishing.editing', v)}
-          />
-          <SliderRow
-            id="pub-vis"
-            label="Publish — Visuals"
-            value={sliders['publishing.visuals']}
-            onChange={(v) => setSlider('publishing.visuals', v)}
-          />
+          {sliderGroups.map((group) => (
+            <React.Fragment key={group.key}>
+              {group.sliders.map((slider) => (
+                <SliderRow
+                  key={slider.key}
+                  id={`${group.key}-${slider.key}`}
+                  label={`${group.label} — ${slider.label}`}
+                  value={qualities[group.key]?.[slider.key] ?? 0}
+                  onChange={(v) => setSliderValue(group.key, slider.key, v)}
+                />
+              ))}
+            </React.Fragment>
+          ))}
         </div>
 
         <div className="mt-4 flex items-center justify-end gap-3">

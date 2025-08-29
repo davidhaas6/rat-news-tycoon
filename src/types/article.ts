@@ -1,4 +1,5 @@
-export type ArticleType = 'entertainment' | 'listicle' | 'science' | 'breaking';
+export const ARTICLE_TYPES = ['entertainment', 'listicle', 'science', 'breaking'] as const;
+export type ArticleType = typeof ARTICLE_TYPES[number];
 
 export type Qualities = {
   investigation: { aggregate: number; original: number; factCheck: number };
@@ -18,3 +19,4 @@ export type Article = {
 };
 
 export type DraftArticle = Omit<Article, 'id' | 'readership' | 'credibility' | 'relevance'>;
+
