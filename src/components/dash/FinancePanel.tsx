@@ -15,28 +15,64 @@ export default function FinancePanel() {
   const timestamp = useGame(s => s.getTimeStamp)
 
   return (
-    <section className="rounded text-stone-100 p-4 border-4 h-full yellow-border">
-      <h2 className="text-lg font-bold">Management</h2>
-      <p>{timestamp()}</p>
-      <p>{Math.round(cash).toLocaleString()} Cheddar</p>
-      <p>{writers} rat employees</p>
-      <p>{Math.round(totalViews()).toLocaleString()} views</p>
-      <p>{subscribers} subscribers</p>
-      <p>Income: {Math.round(revenue()).toLocaleString()} Cheddar</p>
-      <p>Cost: {Math.round(costs()).toLocaleString()} Cheddar</p>
+    <section className="rounded-lg p-4 bg-stone-800 text-stone-100 border-4 yellow-border shadow-md flex flex-col h-full">
+      <header className="mb-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-lg font-bold">Management</h2>
+          <small className="text-sm text-stone-300">{timestamp()}</small>
+        </div>
+      </header>
 
-      <button
-        className="mt-2 btn"
-        disabled={cash < writerCost}
-        onClick={() => hire()}
-      >
-        Hire Rat <br/><small>({writerCost} Cheddar)</small>
-      </button>
-      <button
-        onClick={() => reset()}
-      >
-        Restart
-      </button>
+      <ul className="space-y-2 flex-1">
+        <li className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Cash</span>
+          <span className="font-semibold text-right">{Math.round(cash).toLocaleString()} Cheddar</span>
+        </li>
+
+        <li className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Employees</span>
+          <span className="font-semibold">{writers} rats</span>
+        </li>
+
+        <li className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Views</span>
+          <span className="font-semibold">{Math.round(totalViews()).toLocaleString()}</span>
+        </li>
+
+        <li className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Subscribers</span>
+          <span className="font-semibold">{subscribers}</span>
+        </li>
+
+        <li className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Income</span>
+          <span className="font-semibold">{Math.round(revenue()).toLocaleString()} Cheddar</span>
+        </li>
+
+        <li className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Cost</span>
+          <span className="font-semibold">{Math.round(costs()).toLocaleString()} Cheddar</span>
+        </li>
+      </ul>
+
+      <footer className="mt-4 flex gap-3">
+        <button
+          className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition ${cash < writerCost ? 'opacity-60 cursor-not-allowed' : 'bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500'}`}
+          disabled={cash < writerCost}
+          onClick={() => hire()}
+          aria-disabled={cash < writerCost}
+        >
+          <div>Hire Rat</div>
+          <div className="text-xs font-normal">({writerCost} Cheddar)</div>
+        </button>
+
+        <button
+          className="rounded px-3 py-2 text-sm border border-stone-700 text-stone-200 hover:border-stone-500"
+          onClick={() => reset()}
+        >
+          Restart
+        </button>
+      </footer>
     </section>
   );
 }
