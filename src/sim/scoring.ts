@@ -1,4 +1,4 @@
-import type { ArticleType, DraftArticle, Qualities, Reception } from '../types/article';
+import type { ArticleType, DraftArticle, Qualities, Reception, ArticleScore } from '../types/article';
 
 // Gameplay constants for tuning
 const BASE_SUBSCRIBER_READERSHIP_RATIO = 0.1;
@@ -83,8 +83,10 @@ const sweetSpots: SweetSpots = {
   },
 };
 
-function calculateArticleScore(draft: DraftArticle): number {
+
+function calculateArticleScore(draft: DraftArticle): ArticleScore {
   const targets = sweetSpots[draft.type];
+  const insights = [];
   const scores: Record<keyof Qualities, number> = {
     investigation: 0,
     writing: 0,
@@ -104,7 +106,7 @@ function calculateArticleScore(draft: DraftArticle): number {
       const quality = qualityKey as keyof typeof qualities;
       const draftValue = draft.qualities[group][quality];
       const { mean, sigma } = targets[group][quality];
-      
+
       groupScore += matchGaussian(draftValue, mean, sigma);
       qualityCount++;
     }
@@ -112,33 +114,47 @@ function calculateArticleScore(draft: DraftArticle): number {
     if (qualityCount > 0) {
       scores[group] = groupScore / qualityCount;
       cumulativeQualityScore += scores[group] / numQualityGroups;
+
+      if (Math.random() < 0.5) { // coin flip for fun
+        if (scores[group] > 0.6) {
+          insights.push(`Good ${group}`);
+        } else if (scores[group] < 0.3) {
+          insights.push(`Poor ${group} quality`);
+        }
+      }
     }
   }
 
   console.log(`[scoreArticle] Scores for ${draft.type} "${draft.topic}":`, scores);
-  return cumulativeQualityScore;
+  return {
+    score: cumulativeQualityScore,
+    categories: scores,
+    insights: insights
+  };
 }
 
+
 export function calculateReception(draft: DraftArticle, subscribers: number): Reception {
-  const score = calculateArticleScore(draft);
-  const max_audience = Math.max(subscribers*1.5, MAX_POTENTIAL_AUDIENCE);
+  const articleReview = calculateArticleScore(draft);
+  const sliderScore = articleReview.score;
+  const max_audience = Math.max(subscribers * 1.5, MAX_POTENTIAL_AUDIENCE);
 
   // Viral readership grows quadratically with score
-  let viralReads = max_audience * score * score;
+  let viralReads = max_audience * sliderScore * sliderScore;
   viralReads *= 1 + (Math.random() - 0.5) / 5;
 
   // Subscriber readership is a mix of base + score-driven bonus
-  const subscriberReads = subscribers * (BASE_SUBSCRIBER_READERSHIP_RATIO + score * BONUS_SUBSCRIBER_READERSHIP_RATIO);
-  
+  const subscriberReads = subscribers * (BASE_SUBSCRIBER_READERSHIP_RATIO + sliderScore * BONUS_SUBSCRIBER_READERSHIP_RATIO);
+
   const readership = Math.round(subscriberReads + viralReads);
 
   // New subscribers are a function of viral reads and a score-dependent conversion rate
-  const conversionRate = MAX_CONVERSION_RATE * score;
+  const conversionRate = MAX_CONVERSION_RATE * sliderScore;
   const newSubscribers = Math.round(viralReads * conversionRate);
-
   return {
     readership,
     newSubscribers,
+    staticReview: articleReview
   };
 }
 

@@ -8,11 +8,23 @@ export type Qualities = {
   publishing: { editing: number; visuals: number };
 };
 
+export type ArticleScore = {
+  score: number
+  categories: Record<keyof Qualities, number>
+  insights: string[]
+}
+
 export type Reception = {
   readership: number;
   newSubscribers: number;
+  staticReview: ArticleScore;
   // credibility: number;
   // relevance: number;
+}
+
+export type Stats = {
+  viewRevenue: number;
+  insights?: string[];
 }
 
 export type Article = {
@@ -22,8 +34,9 @@ export type Article = {
   qualities: Qualities;
   status: ArticleStatus;
   reception: Reception;
-  category?: string;
   publishTick: number;
+  category?: string;
+  stats?: Stats;
 };
 
-export type DraftArticle = Omit<Article, 'id' | 'reception' | 'publishTick'>;
+export type DraftArticle = Omit<Article, 'id' | 'reception' | 'publishTick' | 'stats'>;

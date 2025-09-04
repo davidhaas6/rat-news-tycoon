@@ -130,8 +130,19 @@ export const useGame = create<GameState & GameActions>()(
             newViews += a.reception.readership;
           }
         }
-        
-        const subscriberLoss = monthsCrossed * Math.round(Math.random() * 0.1 * (s.subscribers));
+        if (newSubs > 0)
+          console.log("adding " + newSubs + " subscribers in tick" + newTick)
+
+        //subscriber decay
+        let subscriberLoss = 0;
+        if (monthsCrossed > 0) {
+          const publishedThisMonth = (article: Article) => article.status === 'published' && article.publishTick >= newTick - TICKS_PER_MONTH;
+          const numPublishedMonth = Object.values(get().articles).filter(publishedThisMonth).length;
+          const decayPct = Math.max(0, Math.random() * 0.5 - (numPublishedMonth/10));
+          subscriberLoss = monthsCrossed * Math.round(decayPct * s.subscribers);
+          console.log("Lost " + Math.round(decayPct*1000)/10 + " % of subscribers in tick " + newTick)
+        }
+
         const updatedSubCount = s.subscribers + newSubs - subscriberLoss;
         const employeeCost = monthsCrossed * COST_WRITER_MONTHLY * s.writers;
         let subscriberRevenue = monthsCrossed * updatedSubCount * REVENUE_SUBSCRIPTION;
@@ -139,12 +150,12 @@ export const useGame = create<GameState & GameActions>()(
         const viewRevenue = newViews * REVENUE_VIEWS;
 
         // Prorated revenue for new subscriptions
-        if (monthsCrossed == 0) {
-                  const ticksIntoMonth = newTick % TICKS_PER_MONTH;
-        const dayOfMonth = Math.floor(ticksIntoMonth / TICKS_PER_DAY); // 0-indexed day
-        const prorateFactor = (DAYS_PER_MONTH - dayOfMonth) / DAYS_PER_MONTH;
-        const newSubRevenue = newSubs * REVENUE_SUBSCRIPTION * prorateFactor;
-        subscriberRevenue += newSubRevenue;
+        if (monthsCrossed == 0 && newSubs > 0) {
+          const ticksIntoMonth = newTick % TICKS_PER_MONTH;
+          const dayOfMonth = Math.floor(ticksIntoMonth / TICKS_PER_DAY); // 0-indexed day
+          const prorateFactor = (DAYS_PER_MONTH - dayOfMonth) / DAYS_PER_MONTH;
+          const newSubRevenue = newSubs * REVENUE_SUBSCRIPTION * prorateFactor;
+          subscriberRevenue += newSubRevenue;
         }
 
 
@@ -152,7 +163,7 @@ export const useGame = create<GameState & GameActions>()(
           tick: newTick,
           cash: s.cash - employeeCost + subscriberRevenue + viewRevenue,
           articles: anyArticleChanged ? nextArticles : s.articles,
-          subscribers: updatedSubCount + newSubs - subscriberLoss,
+          subscribers: updatedSubCount,
           month: s.month + monthsCrossed,
         };
       });

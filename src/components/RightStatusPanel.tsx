@@ -156,6 +156,8 @@ export default function RightStatusPanel() {
   const articlesRecord = useGame((s) => s.articles);
   const tick = useGame((s) => s.tick);
   const paused = useGame((s) => s.paused);
+  const getArticleRevenue = useGame((s) => s.getArticleRevenue);
+
 
   // Keep track of expanded state per-article. Start compact by default -> expanded=false.
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
@@ -310,13 +312,21 @@ export default function RightStatusPanel() {
                   {/* <MiniEffortBars qualities={item.qualities} /> */}
 
                   <div className="mt-3 flex items-center gap-4 text-sm text-stone-300">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" title='Views'>
                       <span className="text-amber-300">👁</span>
                       <span>{formatNumber(item.reception.readership)}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" title='Subscribers'>
                       <span className="text-amber-300">⭐</span>
                       <span>{formatNumber(item.reception.newSubscribers)}</span>
+                    </div>
+                    <div className="flex items-center gap-2" title='Revenue'>
+                      <span className="text-amber-300">$</span>
+                      <span>{formatNumber(getArticleRevenue(item.id))}</span>
+                    </div>
+                    <div className="flex items-center gap-2" title='Quality'>
+                      <span className="text-amber-300">score</span>
+                      <span>{formatNumber(Math.round(item.reception.staticReview.score*100)/10)} / 10</span>
                     </div>
                   </div>
 
@@ -325,20 +335,7 @@ export default function RightStatusPanel() {
                       <div className="mt-2 flex flex-wrap">
                         {/* very small insight heuristics: extreme qualities */}
                         {(() => {
-                          const insights: string[] = [];
-                          const inv =
-                            item.qualities.investigation.background +
-                            item.qualities.investigation.original +
-                            item.qualities.investigation.factCheck;
-                          const w =
-                            item.qualities.writing.engagement + item.qualities.writing.depth;
-                          const p =
-                            item.qualities.publishing.editing + item.qualities.publishing.visuals;
-                          const total = inv + w + p || 1;
-                          if (w / total > 0.5) insights.push('High engagement');
-                          if (p / total < 0.2) insights.push('Light visuals');
-                          if (inv / total > 0.6) insights.push('Thorough reporting');
-                          return insights.map((t) => <InsightTag key={t} text={t} />);
+                          return item.reception.staticReview.insights.map((t) => <InsightTag key={t} text={t} />);
                         })()}
                       </div>
                       <div className="mt-3">
