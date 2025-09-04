@@ -91,10 +91,10 @@ function QualityBar({ label, value }: { label: string; value: number }) {
 
 function EffortBars({ qualities }: { qualities: Article['qualities'] }) {
   return (
-    <div className="mt-1 flex flex-col gap-3">
+    <div className="mt-1 flex flex-col gap-2">
       <div>
         <div className="text-xs text-stone-300 mb-1 font-semibold">Investigate</div>
-        <div className="flex flex-col gap-1.5 pl-2">
+        <div className="flex flex-col gap-1 pl-2">
           <QualityBar label="Background" value={qualities.investigation.background} />
           <QualityBar label="Originality" value={qualities.investigation.original} />
           <QualityBar label="Fact Check" value={qualities.investigation.factCheck} />
@@ -103,7 +103,7 @@ function EffortBars({ qualities }: { qualities: Article['qualities'] }) {
 
       <div>
         <div className="text-xs text-stone-300 mb-1 font-semibold">Write</div>
-        <div className="flex flex-col gap-1.5 pl-2">
+        <div className="flex flex-col gap-1 pl-2">
           <QualityBar label="Engagement" value={qualities.writing.engagement} />
           <QualityBar label="Depth" value={qualities.writing.depth} />
         </div>
@@ -111,7 +111,7 @@ function EffortBars({ qualities }: { qualities: Article['qualities'] }) {
 
       <div>
         <div className="text-xs text-stone-300 mb-1 font-semibold">Publish</div>
-        <div className="flex flex-col gap-1.5 pl-2">
+        <div className="flex flex-col gap-1 pl-2">
           <QualityBar label="Editing" value={qualities.publishing.editing} />
           <QualityBar label="Visuals" value={qualities.publishing.visuals} />
         </div>
@@ -121,34 +121,7 @@ function EffortBars({ qualities }: { qualities: Article['qualities'] }) {
 }
 
 function InsightTag({ text }: { text: string }) {
-  return <span className="inline-block text-xs px-2 py-1 mr-2 mt-2 rounded bg-stone-800 text-stone-200">{text}</span>;
-}
-
-function MiniEffortBars({ qualities }: { qualities: Article['qualities'] }) {
-  const investigate =
-    qualities.investigation.background +
-    qualities.investigation.original +
-    qualities.investigation.factCheck;
-  const write = qualities.writing.engagement + qualities.writing.depth;
-  const publish = qualities.publishing.editing + qualities.publishing.visuals;
-
-  const total = investigate + write + publish || 1;
-
-  const pct = {
-    investigate: Math.round((investigate / total) * 100),
-    write: Math.round((write / total) * 100),
-    publish: Math.round((publish / total) * 100),
-  };
-
-  return (
-    <div className="mt-2 w-full">
-      <div className="h-1.5 bg-stone-800 rounded overflow-hidden flex">
-        <div style={{ width: `${pct.investigate}%` }} className="bg-amber-400" />
-        <div style={{ width: `${pct.write}%` }} className="bg-red-400/80" />
-        <div style={{ width: `${pct.publish}%` }} className="bg-blue-400/60" />
-      </div>
-    </div>
-  );
+  return <span className="inline-block text-xs px-2 py-1 mr-2 mt-2 rounded-md bg-stone-800 text-stone-200">{text}</span>;
 }
 
 export default function RightStatusPanel() {
@@ -182,7 +155,7 @@ export default function RightStatusPanel() {
 
   function projectedFromReception(readership: number, newSubscribers: number) {
     // small random offset for preview. Keep within reasonable bounds.
-    const randLoc = Math.floor(tick/4)
+    const randLoc = Math.floor(tick / 4)
     const rOffset = Math.floor(readership * (noiseR(randLoc / 100, 0)) * 0.25);
     const sOffset = Math.floor(newSubscribers * (noiseS(randLoc / 50, 0)) * 0.5);
     return {
@@ -311,32 +284,31 @@ export default function RightStatusPanel() {
 
                   {/* <MiniEffortBars qualities={item.qualities} /> */}
 
-                  <div className="mt-3 flex items-center gap-4 text-sm text-stone-300">
-                    <div className="flex items-center gap-2" title='Views'>
-                      <span className="text-amber-300">👁</span>
-                      <span>{formatNumber(item.reception.readership)}</span>
-                    </div>
-                    <div className="flex items-center gap-2" title='Subscribers'>
+                  <div className="mt-3 flex items-center gap-4 text-sm flex-wrap text-stone-300">
+                    <div className="flex items-center gap-2" title='Quality'>
                       <span className="text-amber-300">⭐</span>
-                      <span>{formatNumber(item.reception.newSubscribers)}</span>
+                      <span>{formatNumber(Math.round(item.reception.staticReview.score * 50) / 10)}</span>
                     </div>
                     <div className="flex items-center gap-2" title='Revenue'>
                       <span className="text-amber-300">$</span>
                       <span>{formatNumber(getArticleRevenue(item.id))}</span>
                     </div>
-                    <div className="flex items-center gap-2" title='Quality'>
-                      <span className="text-amber-300">score</span>
-                      <span>{formatNumber(Math.round(item.reception.staticReview.score*100)/10)} / 10</span>
+                    <div className="flex items-center gap-2" title='Views'>
+                      <span className="text-amber-300">👁</span>
+                      <span>{formatNumber(item.reception.readership)}</span>
+                    </div>
+                    <div className="flex items-center gap-2" title='Subscribers'>
+                      <span className="text-amber-300">📜</span>
+                      <span>{formatNumber(item.reception.newSubscribers)}</span>
                     </div>
                   </div>
 
                   {isExpanded && (
                     <>
                       <div className="mt-2 flex flex-wrap">
-                        {/* very small insight heuristics: extreme qualities */}
-                        {(() => {
-                          return item.reception.staticReview.insights.map((t) => <InsightTag key={t} text={t} />);
-                        })()}
+                        {
+                           item.reception.staticReview.insights.map((t) => <InsightTag key={t} text={t} />)
+                        }
                       </div>
                       <div className="mt-3">
                         <EffortBars qualities={item.qualities} />
