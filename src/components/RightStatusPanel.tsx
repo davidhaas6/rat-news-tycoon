@@ -78,38 +78,43 @@ function ProgressRing({ size = 36, progress = 0 }: { size?: number; progress?: n
   );
 }
 
-function EffortBars({ qualities }: { qualities: Article['qualities'] }) {
-  // Map internal quality structure to the three labeled bars (Investigate/Write/Publish)
-  const investigate =
-    qualities.investigation.background +
-    qualities.investigation.original +
-    qualities.investigation.factCheck;
-  const write = qualities.writing.engagement + qualities.writing.depth;
-  const publish = qualities.publishing.editing + qualities.publishing.visuals;
-
-  const total = investigate + write + publish || 1;
-
-  const pct = {
-    investigate: Math.round((investigate / total) * 100),
-    write: Math.round((write / total) * 100),
-    publish: Math.round((publish / total) * 100),
-  };
-
+function QualityBar({ label, value }: { label: string; value: number }) {
   return (
-    <div className="mt-1 flex flex-col gap-1">
-      <div className="text-xs text-stone-300">Investigate</div>
-      <div className="h-2 w-full bg-stone-800 rounded overflow-hidden">
-        <div style={{ width: `${pct.investigate}%` }} className="h-full bg-amber-400" />
+    <div className="grid grid-cols-3 items-center gap-2">
+      <div className="text-xs text-stone-400 col-span-1 truncate">{label}</div>
+      <div className="h-2 w-full bg-stone-800 rounded overflow-hidden col-span-2">
+        <div style={{ width: `${value}%` }} className="h-full bg-amber-400" />
+      </div>
+    </div>
+  );
+}
+
+function EffortBars({ qualities }: { qualities: Article['qualities'] }) {
+  return (
+    <div className="mt-1 flex flex-col gap-3">
+      <div>
+        <div className="text-xs text-stone-300 mb-1 font-semibold">Investigate</div>
+        <div className="flex flex-col gap-1.5 pl-2">
+          <QualityBar label="Background" value={qualities.investigation.background} />
+          <QualityBar label="Originality" value={qualities.investigation.original} />
+          <QualityBar label="Fact Check" value={qualities.investigation.factCheck} />
+        </div>
       </div>
 
-      <div className="text-xs text-stone-300">Write</div>
-      <div className="h-2 w-full bg-stone-800 rounded overflow-hidden">
-        <div style={{ width: `${pct.write}%` }} className="h-full bg-amber-400" />
+      <div>
+        <div className="text-xs text-stone-300 mb-1 font-semibold">Write</div>
+        <div className="flex flex-col gap-1.5 pl-2">
+          <QualityBar label="Engagement" value={qualities.writing.engagement} />
+          <QualityBar label="Depth" value={qualities.writing.depth} />
+        </div>
       </div>
 
-      <div className="text-xs text-stone-300">Publish</div>
-      <div className="h-2 w-full bg-stone-800 rounded overflow-hidden">
-        <div style={{ width: `${pct.publish}%` }} className="h-full bg-amber-400" />
+      <div>
+        <div className="text-xs text-stone-300 mb-1 font-semibold">Publish</div>
+        <div className="flex flex-col gap-1.5 pl-2">
+          <QualityBar label="Editing" value={qualities.publishing.editing} />
+          <QualityBar label="Visuals" value={qualities.publishing.visuals} />
+        </div>
       </div>
     </div>
   );
@@ -302,7 +307,7 @@ export default function RightStatusPanel() {
                     </div>
                   </div>
 
-                  <MiniEffortBars qualities={item.qualities} />
+                  {/* <MiniEffortBars qualities={item.qualities} /> */}
 
                   <div className="mt-3 flex items-center gap-4 text-sm text-stone-300">
                     <div className="flex items-center gap-2">
