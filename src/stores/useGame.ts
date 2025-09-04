@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Article, DraftArticle } from '../types/article';
 import { calculateReception } from '../sim/scoring';
-import { DAYS_PER_MONTH, PUBLISH_DUR_TICKS, TICKS_PER_MONTH, TICKS_PER_DAY } from '../sim/constants';
+import { DAYS_PER_MONTH, PUBLISH_DUR_TICKS, TICKS_PER_MONTH, TICKS_PER_DAY, REVENUE_VIEWS } from '../sim/constants';
 
 interface GameState {
   cash: number
@@ -25,6 +25,7 @@ interface GameActions {
   getPendingArticles: () => Article[]
   getTotalViews: () => number
   getMonthlyRevenue: () => number
+  getArticleRevenue: (id: string) => number
 
 
   // Actions
@@ -60,7 +61,6 @@ const COST_WRITER_MONTHLY = 200;
 const COST_WRITER_INITIAL = 400;
 const COST_ARTICLE_PUBLISH = 100;
 const REVENUE_SUBSCRIPTION = 1;
-const REVENUE_VIEWS = 0.005;
 
 export const useGame = create<GameState & GameActions>()(
   persist((set, get) => ({
@@ -98,6 +98,11 @@ export const useGame = create<GameState & GameActions>()(
       // calcluates the monthly revenue from subscriptions
       return get().subscribers * REVENUE_SUBSCRIPTION;
     },
+    getArticleRevenue(id: string) {
+      const article = get().articles[id];
+      if (!article) return 0;
+      return article.reception.readership * REVENUE_VIEWS;
+    },
     advance(dt: number) {
       set((s) => {
         const newTick = s.tick + dt;
@@ -125,22 +130,29 @@ export const useGame = create<GameState & GameActions>()(
             newViews += a.reception.readership;
           }
         }
-
+        
+        const subscriberLoss = monthsCrossed * Math.round(Math.random() * 0.1 * (s.subscribers));
+        const updatedSubCount = s.subscribers + newSubs - subscriberLoss;
         const employeeCost = monthsCrossed * COST_WRITER_MONTHLY * s.writers;
-        const subscriberRevenue = monthsCrossed * s.subscribers * REVENUE_SUBSCRIPTION;
+        let subscriberRevenue = monthsCrossed * updatedSubCount * REVENUE_SUBSCRIPTION;
+
         const viewRevenue = newViews * REVENUE_VIEWS;
 
         // Prorated revenue for new subscriptions
-        const ticksIntoMonth = newTick % TICKS_PER_MONTH;
+        if (monthsCrossed == 0) {
+                  const ticksIntoMonth = newTick % TICKS_PER_MONTH;
         const dayOfMonth = Math.floor(ticksIntoMonth / TICKS_PER_DAY); // 0-indexed day
         const prorateFactor = (DAYS_PER_MONTH - dayOfMonth) / DAYS_PER_MONTH;
         const newSubRevenue = newSubs * REVENUE_SUBSCRIPTION * prorateFactor;
+        subscriberRevenue += newSubRevenue;
+        }
+
 
         return {
           tick: newTick,
-          cash: s.cash - employeeCost + subscriberRevenue + viewRevenue + newSubRevenue,
+          cash: s.cash - employeeCost + subscriberRevenue + viewRevenue,
           articles: anyArticleChanged ? nextArticles : s.articles,
-          subscribers: s.subscribers + newSubs,
+          subscribers: updatedSubCount + newSubs - subscriberLoss,
           month: s.month + monthsCrossed,
         };
       });
@@ -162,7 +174,6 @@ export const useGame = create<GameState & GameActions>()(
       console.log("Publishing article:", draft);
 
       const reception = calculateReception(draft, get().subscribers);
-
       set(s => ({
         articles: {
           ...s.articles,
