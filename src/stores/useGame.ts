@@ -52,13 +52,13 @@ const INIT_STATE: GameState = {
   month: 0,
 
   publicationName: "Rat News Corp",
-  tickSpeed: 1,
+  tickSpeed: 2,
   paused: false,
 }
 
-const COST_WRITER_MONTHLY = 300;
-const COST_WRITER_INITIAL = 100;
-const COST_ARTICLE_PUBLISH = 20;
+const COST_WRITER_MONTHLY = 200;
+const COST_WRITER_INITIAL = 400;
+const COST_ARTICLE_PUBLISH = 100;
 const REVENUE_SUBSCRIPTION = 1;
 const REVENUE_VIEWS = 0.005;
 
