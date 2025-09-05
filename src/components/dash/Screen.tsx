@@ -3,11 +3,14 @@ import { useGame } from '../../stores/useGame';
 import PublishPanel from '../PublishPanel';
 import { bus } from '../../utils/eventBus';
 import { AnimatePresence, motion } from "motion/react"
+import NewsDesk from '../NewsDesk';
 
 export default function Screen() {
   const publishArticle = useGame(s => s.publishArticle);
   const [showPublish, setShowPublish] = useState(false);
   const openerRef = useRef<HTMLElement | null>(null);
+  const writers = useGame(s => s.writers);
+
 
   useEffect(() => {
     const unsub = bus.on('openPublish', () => {
@@ -40,7 +43,7 @@ export default function Screen() {
   return (
     <section className="rounded-lg min-w-[320px] w-full h-full bg-stone-900 text-stone-100 p-4 mx-4 md:mx-0">
       <AnimatePresence>
-        <div className="flex items-center justify-between">
+        <div key="screen-header" className="flex items-center justify-between">
           <h2 className="text-lg font-bold">Game screen</h2>
           <div className="flex items-center gap-2">
             <button
@@ -52,7 +55,7 @@ export default function Screen() {
           </div>
         </div>
 
-        <p className="mt-3 text-sm text-stone-300">beep-boop</p>
+        {/* <p className="mt-3 text-sm text-stone-300">beep-boop</p> */}
 
         {showPublish && 
           <motion.div 

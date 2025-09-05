@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useGame } from '../stores/useGame';
 import type { Article } from '../types/article';
-import { PUBLISH_DUR_TICKS, TICKS_PER_DAY } from '../sim/constants';
+import { DAYS_PER_MONTH, PUBLISH_DUR_TICKS, TICKS_PER_DAY } from '../sim/constants';
 import { createNoise2D } from 'simplex-noise';
 import { bus } from '../utils/eventBus';
 import { AnimatePresence, motion } from 'motion/react';
@@ -169,7 +169,7 @@ export default function RightStatusPanel() {
   return (
     <aside className="h-full bg-stone-900 text-stone-100 p-4 flex flex-col rounded-lg mx-4 md:ml-0">
       {/* Top header with compact label at top-right by request — we'll show a short hint */}
-      <AnimatePresence>
+      
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold">Articles</h3>
         <div className="flex items-center gap-3">
@@ -182,9 +182,10 @@ export default function RightStatusPanel() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto p-1">
+        <AnimatePresence>
         {/* Queue Section */}
-        <div className="mb-4">
+        <div className="mb-4" key="queue-section">
           <div className="sticky top-0 bg-stone-900/70 py-2 z-10">
             <div className="text-sm text-stone-300">In Progress</div>
           </div>
@@ -216,7 +217,7 @@ export default function RightStatusPanel() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col items-start gap-2">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <TypeChip text={item.type} />
                           <StatusPill text="In Progress" />
                         </div>
@@ -256,7 +257,7 @@ export default function RightStatusPanel() {
         </div>
 
         {/* Published Section */}
-        <div>
+        <div key="published-section">
           <div className="sticky top-12 bg-stone-900/70 py-2 z-10 mt-6">
             <div className="text-sm text-stone-300">Published</div>
           </div>
@@ -291,6 +292,14 @@ export default function RightStatusPanel() {
                       {(() => {
                         const ageTicks = Math.max(0, tick - item.publishTick);
                         const days = Math.floor(ageTicks / TICKS_PER_DAY);
+                        if (days >= 365) {
+                          const years = Math.floor(days / 365);
+                          return `${years}yr ago`;
+                        }
+                        if (days >= DAYS_PER_MONTH) {
+                          const months = Math.floor(days / DAYS_PER_MONTH);
+                          return `${months}mo ago`;
+                        }
                         if (days === 0) return 'Today';
                         if (days === 1) return 'Yesterday';
                         return `${days}d ago`;
@@ -336,8 +345,9 @@ export default function RightStatusPanel() {
             })}
           </div>
         </div>
+        </AnimatePresence>
       </div>
-      </AnimatePresence>
+      
     </aside>
   );
 }

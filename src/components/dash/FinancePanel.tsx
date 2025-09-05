@@ -23,33 +23,33 @@ export default function FinancePanel() {
       </header>
 
       <ul className="space-y-2 flex-1">
-        <li className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Cash</span>
+        <li key="Cash" className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Cheddar Chest</span>
           <span className="font-semibold text-right">{Math.round(cash).toLocaleString()} Cheddar</span>
         </li>
 
-        <li className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Employees</span>
-          <span className="font-semibold">{writers} rats</span>
-        </li>
-
-        <li className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Views</span>
+        <li key="Views" className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Total Views</span>
           <span className="font-semibold">{Math.round(totalViews()).toLocaleString()}</span>
         </li>
 
-        <li className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Subscribers</span>
+        <li key="Subscribers" className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Rat Subscribers</span>
           <span className="font-semibold">{subscribers}</span>
         </li>
 
-        <li className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Income</span>
+        <li key="Employees" className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Writing Staff</span>
+          <span className="font-semibold">{writers} rats</span>
+        </li>
+
+        <li key="Income" className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Monthly Revenue</span>
           <span className="font-semibold">{Math.round(revenue()).toLocaleString()} Cheddar</span>
         </li>
 
-        <li className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Cost</span>
+        <li key="Cost" className="flex justify-between items-baseline">
+          <span className="text-sm text-stone-300">Monthly Fixed Costs</span>
           <span className="font-semibold">{Math.round(costs()).toLocaleString()} Cheddar</span>
         </li>
       </ul>
