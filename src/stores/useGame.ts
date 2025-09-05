@@ -138,9 +138,9 @@ export const useGame = create<GameState & GameActions>()(
         if (monthsCrossed > 0) {
           const publishedThisMonth = (article: Article) => article.status === 'published' && article.publishTick >= newTick - TICKS_PER_MONTH;
           const numPublishedMonth = Object.values(nextArticles).filter(publishedThisMonth).length;
-          const decayPct = Math.max(0, Math.random() * 0.5 - (numPublishedMonth/10));
+          const decayPct = Math.max(0, Math.random() * 0.5 - (numPublishedMonth / 10));
           subscriberLoss = monthsCrossed * Math.round(decayPct * s.subscribers);
-          console.log("Lost " + Math.round(decayPct*1000)/10 + " % of subscribers in tick " + newTick)
+          console.log("Lost " + Math.round(decayPct * 1000) / 10 + " % of subscribers in tick " + newTick)
         }
 
         const updatedSubCount = s.subscribers + newSubs - subscriberLoss;
@@ -207,6 +207,11 @@ export const useGame = create<GameState & GameActions>()(
     },
     reset() {
       set(INIT_STATE)
+      try {
+        localStorage.removeItem('rnn-save');
+      } catch (err) {
+        console.warn('Failed to clear persisted game save', err);
+      }
     },
   }), { name: 'rnn-save' })
 );
