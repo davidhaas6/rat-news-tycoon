@@ -1,15 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../../stores/useGame';
 import PublishPanel from '../PublishPanel';
+import { bus } from '../../utils/eventBus';
 
 export default function Screen() {
   const publishArticle = useGame(s => s.publishArticle);
   const [showPublish, setShowPublish] = useState(false);
+  const openerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const unsub = bus.on('openPublish', () => {
+      // capture the element that currently has focus (the button that was clicked)
+      if (!showPublish) {
+        openerRef.current = document.activeElement as HTMLElement | null;
+        setShowPublish(true);
+      }
+    });
+    return unsub;
+  }, [showPublish]);
+
+  function handleClose() {
+    setShowPublish(false);
+
+    // restore focus to the element that opened the panel (if any)
+    const opener = openerRef.current;
+    if (opener && typeof (opener as HTMLElement).focus === 'function') {
+      (opener as HTMLElement).focus();
+    }
+    openerRef.current = null;
+  }
 
   function handlePublish(draft: any) {
     // forward to store action
     publishArticle(draft);
-    setShowPublish(false);
+    handleClose();
   }
 
   return (
@@ -31,7 +55,7 @@ export default function Screen() {
       {showPublish && (
         <PublishPanel
           onPublish={handlePublish}
-          onClose={() => setShowPublish(false)}
+          onClose={handleClose}
         />
       )}
     </section>

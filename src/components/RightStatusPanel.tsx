@@ -3,6 +3,7 @@ import { useGame } from '../stores/useGame';
 import type { Article } from '../types/article';
 import { PUBLISH_DUR_TICKS, TICKS_PER_DAY } from '../sim/constants';
 import { createNoise2D } from 'simplex-noise';
+import { bus } from '../utils/eventBus';
 
 
 /**
@@ -169,7 +170,14 @@ export default function RightStatusPanel() {
       {/* Top header with compact label at top-right by request — we'll show a short hint */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold">Articles</h3>
-        <div className="text-xs text-stone-400">Click an article to expand</div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => bus.emit('openPublish', undefined)}
+            className="px-3 py-1 bg-yellow-400 text-stone-900 rounded text-sm font-medium shadow"
+          >
+            New Article
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-auto">
