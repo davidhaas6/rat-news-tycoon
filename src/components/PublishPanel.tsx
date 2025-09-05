@@ -102,12 +102,11 @@ export default function PublishPanel({
 
   function setSliderValue(groupKey: string, sliderKey: string, newValue: number) {
     setQualities(prevQualities => {
-      const newQualities = JSON.parse(JSON.stringify(prevQualities));
+      const newQualities = typeof structuredClone !== 'undefined' ? structuredClone(prevQualities) : JSON.parse(JSON.stringify(prevQualities));
       const group = newQualities[groupKey];
       const sliderKeys = Object.keys(group);
       const currentIndex = sliderKeys.indexOf(sliderKey);
       const currentValue = group[sliderKey];
-
       newValue = Math.max(0, Math.min(100, newValue));
       let diff = newValue - currentValue;
 

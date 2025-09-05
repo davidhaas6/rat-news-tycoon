@@ -11,7 +11,6 @@ interface GameState {
   articles: Record<string, Article>
   researchPts: number
   subscribers: number
-  month: number
   publicationName: string
   tickSpeed: number
   paused: boolean
@@ -51,7 +50,6 @@ const INIT_STATE: GameState = {
   articles: {},
   researchPts: 0,
   subscribers: 0,
-  month: 0,
   revenues: {},
 
   publicationName: "Rat News Corp",
@@ -139,7 +137,7 @@ export const useGame = create<GameState & GameActions>()(
         let subscriberLoss = 0;
         if (monthsCrossed > 0) {
           const publishedThisMonth = (article: Article) => article.status === 'published' && article.publishTick >= newTick - TICKS_PER_MONTH;
-          const numPublishedMonth = Object.values(get().articles).filter(publishedThisMonth).length;
+          const numPublishedMonth = Object.values(nextArticles).filter(publishedThisMonth).length;
           const decayPct = Math.max(0, Math.random() * 0.5 - (numPublishedMonth/10));
           subscriberLoss = monthsCrossed * Math.round(decayPct * s.subscribers);
           console.log("Lost " + Math.round(decayPct*1000)/10 + " % of subscribers in tick " + newTick)
@@ -166,7 +164,6 @@ export const useGame = create<GameState & GameActions>()(
           cash: s.cash - employeeCost + subscriberRevenue + viewRevenue,
           articles: anyArticleChanged ? nextArticles : s.articles,
           subscribers: updatedSubCount,
-          month: s.month + monthsCrossed,
         };
       });
     },
@@ -185,7 +182,7 @@ export const useGame = create<GameState & GameActions>()(
     publishArticle(draft: DraftArticle) {
       const id = crypto.randomUUID();
       console.log("Publishing article:", draft);
-
+      // TODO: check cash
       const reception = calculateReception(draft, get().subscribers);
       set(s => ({
         articles: {
@@ -194,7 +191,7 @@ export const useGame = create<GameState & GameActions>()(
             id,
             ...draft,
             status: 'pending',
-            publishTick: get().tick + PUBLISH_DUR_TICKS,
+            publishTick: s.tick + PUBLISH_DUR_TICKS,
             reception,
           }
         },
