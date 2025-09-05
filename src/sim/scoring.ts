@@ -3,7 +3,7 @@ import type { ArticleType, DraftArticle, Qualities, Reception, ArticleScore } fr
 // Gameplay constants for tuning
 const BASE_SUBSCRIBER_READERSHIP_RATIO = 0.5;
 const BONUS_SUBSCRIBER_READERSHIP_RATIO = 0.5;
-const BASE_AUDIENCE = 1000;
+const BASE_AUDIENCE = 10000;
 const MAX_CONVERSION_RATE = 0.01;
 
 
@@ -69,8 +69,8 @@ const sweetSpots: SweetSpots = {
   breaking: {
     investigation: {
       background: { mean: 10, sigma: 10 },
-      original: { mean: 50, sigma: 10 },
-      factCheck: { mean: 40, sigma: 20 },
+      original: { mean: 60, sigma: 10 },
+      factCheck: { mean: 30, sigma: 20 },
     },
     writing: {
       engagement: { mean: 60, sigma: 20 },
@@ -115,7 +115,7 @@ function calculateArticleScore(draft: DraftArticle): ArticleScore {
       scores[group] = groupScore / qualityCount;
       cumulativeQualityScore += scores[group] / numQualityGroups;
 
-      if (Math.random() < 0.6) { // coin flip for fun
+      if (Math.random() < 0.7) { // coin flip for fun
         if (scores[group] > 0.9) {
           insights.push(`Great ${group}`);
         } else if (scores[group] > 0.6) {
