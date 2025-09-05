@@ -115,15 +115,15 @@ function calculateArticleScore(draft: DraftArticle): ArticleScore {
       scores[group] = groupScore / qualityCount;
       cumulativeQualityScore += scores[group] / numQualityGroups;
 
-      if (Math.random() < 0.7) { // coin flip for fun
+      if (Math.random() < 0.5) { // coin flip for fun
         if (scores[group] > 0.9) {
-          insights.push(`Great ${group}`);
+          insights.push(`Top-Cheese ${group}`);
         } else if (scores[group] > 0.6) {
-          insights.push(`Good ${group}`);
+          insights.push(`Zesty ${group}`);
         } else if (scores[group] > 0.4) {
-          insights.push(`Mid ${group}`);
+          insights.push(`Scrappy ${group}`);
         } else if (scores[group] < 0.3) {
-          insights.push(`Poor ${group}`);
+          insights.push(`Crummy ${group}`);
         }
       }
     }
