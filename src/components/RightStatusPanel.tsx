@@ -4,6 +4,7 @@ import type { Article } from '../types/article';
 import { PUBLISH_DUR_TICKS, TICKS_PER_DAY } from '../sim/constants';
 import { createNoise2D } from 'simplex-noise';
 import { bus } from '../utils/eventBus';
+import { AnimatePresence, motion } from 'motion/react';
 
 
 /**
@@ -168,6 +169,7 @@ export default function RightStatusPanel() {
   return (
     <aside className="h-full bg-stone-900 text-stone-100 p-4 flex flex-col rounded-lg mx-4 md:ml-0">
       {/* Top header with compact label at top-right by request — we'll show a short hint */}
+      <AnimatePresence>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold">Articles</h3>
         <div className="flex items-center gap-3">
@@ -201,12 +203,15 @@ export default function RightStatusPanel() {
               const projected = projectedFromReception(item.reception.readership, item.reception.newSubscribers);
 
               return (
-                <div
+                <motion.div
                   key={item.id}
                   role="listitem"
                   onClick={() => toggleExpanded(item.id)}
                   className={`w-full bg-stone-800/30 rounded border border-stone-700 p-3 transition-transform hover:-translate-y-0.5 cursor-pointer`}
                   style={{ minHeight: isExpanded ? 80 : 64 }}
+                  initial={{opacity: 0.3}}
+                  animate={{opacity: 1}}
+                  transition={{ duration: .5 }}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -244,7 +249,7 @@ export default function RightStatusPanel() {
                       </div>
                     </>
                   )}
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -265,11 +270,14 @@ export default function RightStatusPanel() {
               const isExpanded = !!expanded[item.id];
 
               return (
-                <div
-                  key={item.id}
+                <motion.div
+                  key={item.id + "pub"}
                   onClick={() => toggleExpanded(item.id)}
                   className={`w-full bg-stone-800/20 rounded border border-stone-700 p-3 transition-transform hover:-translate-y-0.5 cursor-pointer`}
                   style={{ minHeight: isExpanded ? 96 : 72 }}
+                  initial={{opacity: 0.3, scale: 0.95}}
+                  animate={{opacity: 1, scale: 1}}
+                  transition={{ duration: 0.2 }}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
@@ -323,12 +331,13 @@ export default function RightStatusPanel() {
                       </div>
                     </>
                   )}
-                </div>
+                </motion.div>
               );
             })}
           </div>
         </div>
       </div>
+      </AnimatePresence>
     </aside>
   );
 }

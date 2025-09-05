@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../../stores/useGame';
 import PublishPanel from '../PublishPanel';
 import { bus } from '../../utils/eventBus';
+import { AnimatePresence, motion } from "motion/react"
 
 export default function Screen() {
   const publishArticle = useGame(s => s.publishArticle);
@@ -38,26 +39,37 @@ export default function Screen() {
 
   return (
     <section className="rounded-lg min-w-[320px] w-full h-full bg-stone-900 text-stone-100 p-4 mx-4 md:mx-0">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">Game screen</h2>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowPublish(true)}
-            className="px-3 py-2 bg-yellow-400 text-stone-900 rounded font-medium shadow"
-          >
-            New Article
-          </button>
+      <AnimatePresence>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold">Game screen</h2>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowPublish(true)}
+              className="px-3 py-2 bg-yellow-400 text-stone-900 rounded font-medium shadow"
+            >
+              New Article
+            </button>
+          </div>
         </div>
-      </div>
 
-      <p className="mt-3 text-sm text-stone-300">beep-boop</p>
+        <p className="mt-3 text-sm text-stone-300">beep-boop</p>
 
-      {showPublish && (
-        <PublishPanel
-          onPublish={handlePublish}
-          onClose={handleClose}
-        />
-      )}
+        {showPublish && 
+          <motion.div 
+          initial={{opacity: 0, scale: 0.7}}
+          animate={{opacity: 1, scale: 1}}
+          exit={{opacity: 0, scale: 0.7}}
+          transition={{ type: "spring", duration: 0.3 }}
+          key="publish-panel"
+          >
+            <PublishPanel
+              onPublish={handlePublish}
+              onClose={handleClose}
+            />
+          </motion.div>
+        }
+      </AnimatePresence>
+
     </section>
   );
 }
