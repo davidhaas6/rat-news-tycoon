@@ -15,6 +15,7 @@ interface GameState {
   publicationName: string
   tickSpeed: number
   paused: boolean
+  revenues: Record<string, number>
 }
 
 interface GameActions {
@@ -51,6 +52,7 @@ const INIT_STATE: GameState = {
   researchPts: 0,
   subscribers: 0,
   month: 0,
+  revenues: {},
 
   publicationName: "Rat News Corp",
   tickSpeed: 2,
@@ -60,7 +62,7 @@ const INIT_STATE: GameState = {
 const COST_WRITER_MONTHLY = 200;
 const COST_WRITER_INITIAL = 400;
 const COST_ARTICLE_PUBLISH = 100;
-const REVENUE_SUBSCRIPTION = 1;
+const REVENUE_SUBSCRIPTION = 2.5;
 
 export const useGame = create<GameState & GameActions>()(
   persist((set, get) => ({

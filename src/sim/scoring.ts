@@ -1,10 +1,10 @@
 import type { ArticleType, DraftArticle, Qualities, Reception, ArticleScore } from '../types/article';
 
 // Gameplay constants for tuning
-const BASE_SUBSCRIBER_READERSHIP_RATIO = 0.1;
-const BONUS_SUBSCRIBER_READERSHIP_RATIO = 0.7;
-const MAX_POTENTIAL_AUDIENCE = 10000;
-const MAX_CONVERSION_RATE = 0.05;
+const BASE_SUBSCRIBER_READERSHIP_RATIO = 0.5;
+const BONUS_SUBSCRIBER_READERSHIP_RATIO = 0.5;
+const BASE_AUDIENCE = 1000;
+const MAX_CONVERSION_RATE = 0.01;
 
 
 // Type for the Gaussian parameters { mean, sigma }
@@ -115,11 +115,15 @@ function calculateArticleScore(draft: DraftArticle): ArticleScore {
       scores[group] = groupScore / qualityCount;
       cumulativeQualityScore += scores[group] / numQualityGroups;
 
-      if (Math.random() < 0.5) { // coin flip for fun
-        if (scores[group] > 0.6) {
+      if (Math.random() < 0.6) { // coin flip for fun
+        if (scores[group] > 0.9) {
+          insights.push(`Great ${group}`);
+        } else if (scores[group] > 0.6) {
           insights.push(`Good ${group}`);
+        } else if (scores[group] > 0.4) {
+          insights.push(`Mid ${group}`);
         } else if (scores[group] < 0.3) {
-          insights.push(`Poor ${group} quality`);
+          insights.push(`Poor ${group}`);
         }
       }
     }
@@ -137,7 +141,7 @@ function calculateArticleScore(draft: DraftArticle): ArticleScore {
 export function calculateReception(draft: DraftArticle, subscribers: number): Reception {
   const articleReview = calculateArticleScore(draft);
   const sliderScore = articleReview.score;
-  const max_audience = Math.max(subscribers * 1.5, MAX_POTENTIAL_AUDIENCE);
+  const max_audience = BASE_AUDIENCE + subscribers * 5;
 
   // Viral readership grows quadratically with score
   let viralReads = max_audience * sliderScore * sliderScore;

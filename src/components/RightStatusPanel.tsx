@@ -213,7 +213,7 @@ export default function RightStatusPanel() {
                       <div className="flex flex-col items-start gap-2">
                         <div className="flex items-center gap-2">
                           <TypeChip text={item.type} />
-                          <StatusPill text="Pending" />
+                          <StatusPill text="In Progress" />
                         </div>
                         <div className="text-sm font-semibold text-stone-100 truncate max-w-[220px]">
                           {item.topic}
@@ -299,7 +299,7 @@ export default function RightStatusPanel() {
                     </div>
                     <div className="flex items-center gap-2" title='Revenue'>
                       <span className="text-amber-300">$</span>
-                      <span>{formatNumber(getArticleRevenue(item.id))}</span>
+                      <span>{formatNumber(Math.round(getArticleRevenue(item.id)*100)/100)}</span>
                     </div>
                     <div className="flex items-center gap-2" title='Views'>
                       <span className="text-amber-300">👁</span>
