@@ -40,7 +40,7 @@ export default function FinancePanel() {
 
         <li key="Employees" className="flex justify-between items-baseline">
           <span className="text-sm text-stone-300">Writing Staff</span>
-          <span className="font-semibold">{writers} rats</span>
+          <span className="font-semibold">{writers.length} rats</span>
         </li>
 
         <li key="Income" className="flex justify-between items-baseline">

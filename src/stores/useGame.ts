@@ -3,10 +3,11 @@ import { persist } from 'zustand/middleware';
 import type { Article, DraftArticle } from '../types/article';
 import { calculateReception } from '../sim/scoring';
 import { DAYS_PER_MONTH, PUBLISH_DUR_TICKS, TICKS_PER_MONTH, TICKS_PER_DAY, REVENUE_VIEWS } from '../sim/constants';
+import { getRandomRatName, type Writer } from '../types/writer';
 
 interface GameState {
   cash: number
-  writers: number
+  writers: Writer[]
   tick: number
   articles: Record<string, Article>
   researchPts: number
@@ -45,7 +46,7 @@ interface GameActions {
 
 const INIT_STATE: GameState = {
   cash: 1000,
-  writers: 1,
+  writers: [{id: crypto.randomUUID(), name: getRandomRatName()}],
   tick: 0,
   articles: {},
   researchPts: 0,
@@ -83,7 +84,12 @@ export const useGame = create<GameState & GameActions>()(
     hireWriter() {
       const cost = COST_WRITER_INITIAL;
       if (get().cash < cost) return;
-      set(s => ({ cash: s.cash - cost, writers: s.writers + 1 }));
+      const writer = {id: crypto.randomUUID(), name: getRandomRatName()};
+      set(s => ({ 
+        cash: s.cash - cost, 
+        writers: [...s.writers,writer]
+      }
+      ));
     },
     getPendingArticles() {
       const articles = Object.values(get().articles).filter(a => a.status === 'pending');
@@ -144,7 +150,7 @@ export const useGame = create<GameState & GameActions>()(
         }
 
         const updatedSubCount = s.subscribers + newSubs - subscriberLoss;
-        const employeeCost = monthsCrossed * COST_WRITER_MONTHLY * s.writers;
+        const employeeCost = monthsCrossed * COST_WRITER_MONTHLY * s.writers.length;
         let subscriberRevenue = monthsCrossed * updatedSubCount * REVENUE_SUBSCRIPTION;
 
         const viewRevenue = newViews * REVENUE_VIEWS;
@@ -169,7 +175,7 @@ export const useGame = create<GameState & GameActions>()(
     },
 
     getMonthlyCost() {
-      return get().writers * COST_WRITER_MONTHLY;
+      return get().writers.length * COST_WRITER_MONTHLY;
     },
     getTimeStamp() {
       const DAYS_PER_YEAR = 12 * DAYS_PER_MONTH;
@@ -215,3 +221,4 @@ export const useGame = create<GameState & GameActions>()(
     },
   }), { name: 'rnn-save' })
 );
+

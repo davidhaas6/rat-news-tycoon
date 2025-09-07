@@ -10,6 +10,8 @@ export default function Screen() {
   const [showPublish, setShowPublish] = useState(false);
   const openerRef = useRef<HTMLElement | null>(null);
   const writers = useGame(s => s.writers);
+  const companyName = useGame(s => s.publicationName);
+
 
 
   useEffect(() => {
@@ -40,11 +42,13 @@ export default function Screen() {
     handleClose();
   }
 
+  const title = `${companyName} Staff`
+
   return (
     <section className="rounded-lg min-w-[320px] w-full h-full bg-stone-900 text-stone-100 p-4 mx-4 md:mx-0">
       <AnimatePresence>
         <div key="screen-header" className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Game screen</h2>
+          <h2 className="text-lg font-bold">{title}</h2>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowPublish(true)}
@@ -56,6 +60,7 @@ export default function Screen() {
         </div>
 
         {/* <p className="mt-3 text-sm text-stone-300">beep-boop</p> */}
+        {!showPublish && writers.map((w) => <NewsDesk key={w.id} writer={w} />)}
 
         {showPublish && 
           <motion.div 
