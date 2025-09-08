@@ -24,7 +24,7 @@ export default function FinancePanel() {
 
       <ul className="space-y-2 flex-1">
         <li key="Cash" className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Cheddar Chest</span>
+          <span className="text-sm text-stone-300">Bank</span>
           <span className="font-semibold text-right">{Math.round(cash).toLocaleString()} Cheddar</span>
         </li>
 
@@ -34,22 +34,22 @@ export default function FinancePanel() {
         </li>
 
         <li key="Subscribers" className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Rat Subscribers</span>
+          <span className="text-sm text-stone-300">Subscribers</span>
           <span className="font-semibold">{subscribers}</span>
         </li>
 
         <li key="Employees" className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Writing Staff</span>
+          <span className="text-sm text-stone-300">Staff</span>
           <span className="font-semibold">{writers.length} rats</span>
         </li>
 
         <li key="Income" className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Monthly Revenue</span>
+          <span className="text-sm text-stone-300">Revenue</span>
           <span className="font-semibold">{Math.round(revenue()).toLocaleString()} Cheddar</span>
         </li>
 
         <li key="Cost" className="flex justify-between items-baseline">
-          <span className="text-sm text-stone-300">Monthly Fixed Costs</span>
+          <span className="text-sm text-stone-300">Fixed Costs</span>
           <span className="font-semibold">{Math.round(costs()).toLocaleString()} Cheddar</span>
         </li>
       </ul>
@@ -62,7 +62,7 @@ export default function FinancePanel() {
           aria-disabled={cash < writerCost}
         >
           <div>Hire Rat</div>
-          <div className="text-xs font-normal">({writerCost} Cheddar)</div>
+          <div className="text-xs font-normal">${writerCost}</div>
         </button>
 
         <button
