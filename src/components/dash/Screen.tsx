@@ -5,6 +5,7 @@ import { bus } from '../../utils/eventBus';
 import { AnimatePresence, motion } from "motion/react";
 import NewsDesk from '../NewsDesk';
 import ViewShell from './ViewShell';
+import ArticleView from './ArticleView';
 
 type ScreenView =
   | { name: 'base' }
@@ -76,9 +77,7 @@ export default function Screen() {
         </div>
       </div>
 
-      <div className="mt-3">
-        {view.name === 'base' && writers.map((w) => <NewsDesk key={w.id} writer={w} />)}
-      </div>
+
 
       <AnimatePresence>
         {view.name === 'publish' && (
@@ -128,11 +127,7 @@ export default function Screen() {
             className="mt-3"
           >
             <ViewShell onClose={closeToBase}>
-              {/* Placeholder: swap in real ArticleView component */}
-              <div className="p-4">
-                <h3 className="text-lg font-semibold">Article: {view.id}</h3>
-                <p className="text-sm text-stone-300">Article content UI placeholder</p>
-              </div>
+              <ArticleView id={view.id} />
             </ViewShell>
           </motion.div>
         )}
@@ -155,7 +150,26 @@ export default function Screen() {
             </ViewShell>
           </motion.div>
         )}
+
+        <div className="mt-3">
+        </div>
+
+        {view.name === 'base' &&
+          // <motion.div
+          //   // initial={{ opacity: 0, scale: 0.4 }}
+          //   // animate={{ opacity: 1, scale: 1 }}
+          //   // exit={{ opacity: 0, scale: 0.4 }}
+          //   // transition={{ duration: 0.3 }}
+          //   key={currentKey}
+          //   className="mt-3"
+          // >
+            writers.map((w) => <NewsDesk key={w.id} writer={w} />)
+          // </motion.div>
+        }
       </AnimatePresence>
+
+
+
     </section>
   );
 }

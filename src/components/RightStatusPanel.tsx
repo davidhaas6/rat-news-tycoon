@@ -5,6 +5,7 @@ import { DAYS_PER_MONTH, PUBLISH_DUR_TICKS, TICKS_PER_DAY } from '../sim/constan
 import { createNoise2D } from 'simplex-noise';
 import { bus } from '../utils/eventBus';
 import { AnimatePresence, motion } from 'motion/react';
+import { i } from 'motion/react-client';
 
 
 /**
@@ -273,7 +274,8 @@ export default function RightStatusPanel() {
                 return (
                   <motion.div
                     key={item.id + "pub"}
-                    onClick={() => toggleExpanded(item.id)}
+                    // onClick={() => toggleExpanded(item.id)}
+                    onClick={() => bus.emit('openView', { name: 'article', id: item.id })}
                     className={`w-full bg-stone-800/20 rounded border border-stone-700 p-3 transition-transform hover:-translate-y-0.5 cursor-pointer`}
                     style={{ minHeight: isExpanded ? 96 : 72 }}
                     initial={{ opacity: 0.3, scale: 0.95 }}
