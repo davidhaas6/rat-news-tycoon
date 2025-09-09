@@ -84,7 +84,7 @@ export default function Screen() {
           <motion.div
             initial={{ opacity: 0, scale: 0.7 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            // exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: "spring", duration: 0.1 }}
             key={currentKey}
             className="mt-3"
@@ -121,7 +121,7 @@ export default function Screen() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
+            // exit={{ opacity: 0, x: -20 }}
             transition={{ type: "spring", duration: 0.25 }}
             key={currentKey}
             className="mt-3"
