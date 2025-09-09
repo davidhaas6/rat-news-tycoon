@@ -169,7 +169,7 @@ export default function RightStatusPanel() {
   return (
     <aside className="h-full bg-stone-900 text-stone-100 p-4 flex flex-col rounded-lg mx-4 md:ml-0">
       {/* Top header with compact label at top-right by request — we'll show a short hint */}
-      
+
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold">Articles</h3>
         <div className="flex items-center gap-3">
@@ -184,170 +184,182 @@ export default function RightStatusPanel() {
 
       <div className="flex-1 overflow-auto p-1">
         <AnimatePresence>
-        {/* Queue Section */}
-        <div className="mb-4" key="queue-section">
-          <div className="sticky top-0 bg-stone-900/70 py-2 z-10">
-            <div className="text-sm text-stone-300">In Progress</div>
-          </div>
+          {/* Queue Section */}
+          <div className="mb-4" key="queue-section">
+            <div className="sticky top-0 bg-stone-900/70 py-2 z-10">
+              <div className="text-sm text-stone-300">In Progress</div>
+            </div>
 
-          <div role="list" className="mt-3 space-y-3">
-            {queue.length === 0 && (
-              <div className="text-stone-400 italic">No articles in production.</div>
-            )}
+            <div role="list" className="mt-3 space-y-3">
+              {queue.length === 0 && (
+                <div className="text-stone-400 italic">No articles in production.</div>
+              )}
 
-            {queue.map((item) => {
-              const isExpanded = !!expanded[item.id];
-              // compute progress based on publishTick
-              const remaining = Math.max(0, item.publishTick - tick);
-              const progress = Math.max(0, Math.min(1, 1 - remaining / PUBLISH_DUR_TICKS));
-              const etaStr = ticksToETA(item.publishTick, tick);
-              const projected = projectedFromReception(item.reception.readership, item.reception.newSubscribers);
+              {queue.map((item) => {
+                const isExpanded = !!expanded[item.id];
+                // compute progress based on publishTick
+                const remaining = Math.max(0, item.publishTick - tick);
+                const progress = Math.max(0, Math.min(1, 1 - remaining / PUBLISH_DUR_TICKS));
+                const etaStr = ticksToETA(item.publishTick, tick);
+                const projected = projectedFromReception(item.reception.readership, item.reception.newSubscribers);
 
-              return (
-                <motion.div
-                  key={item.id}
-                  role="listitem"
-                  onClick={() => toggleExpanded(item.id)}
-                  className={`w-full bg-stone-800/30 rounded border border-stone-700 p-3 transition-transform hover:-translate-y-0.5 cursor-pointer`}
-                  style={{ minHeight: isExpanded ? 80 : 64 }}
-                  initial={{opacity: 0.3}}
-                  animate={{opacity: 1}}
-                  transition={{ duration: .5 }}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="flex flex-col items-start gap-2">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <TypeChip text={item.type} />
-                          <StatusPill text="In Progress" />
+                return (
+                  <motion.div
+                    key={item.id}
+                    role="listitem"
+                    onClick={() => toggleExpanded(item.id)}
+                    className={`w-full bg-stone-800/30 rounded border border-stone-700 p-3 transition-transform hover:-translate-y-0.5 cursor-pointer`}
+                    style={{ minHeight: isExpanded ? 80 : 64 }}
+                    initial={{ opacity: 0.3 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: .5 }}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex flex-col items-start gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <TypeChip text={item.type} />
+                            <StatusPill text="In Progress" />
+                          </div>
+                          <div className="text-sm font-semibold text-stone-100 truncate max-w-[220px]">
+                            {item.topic}
+                          </div>
+                          <div className="text-xs text-stone-400">{item.category}</div>
                         </div>
-                        <div className="text-sm font-semibold text-stone-100 truncate max-w-[220px]">
-                          {item.topic}
-                        </div>
-                        <div className="text-xs text-stone-400">{item.category}</div>
+                      </div>
+
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="text-sm font-medium text-stone-100">{etaStr}</div>
+                        <ProgressRing progress={paused ? 0 : progress} />
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-2">
-                      <div className="text-sm font-medium text-stone-100">{etaStr}</div>
-                      <ProgressRing progress={paused ? 0 : progress} />
-                    </div>
-                  </div>
-
-                  {!isExpanded && (
-                    <div className="mt-2 text-xs text-stone-300">
-                      Projected ≈ {formatNumber(projected.readers)} readers • +{formatNumber(projected.subs)} subs
-                    </div>
-                  )}
-
-                  {isExpanded && (
-                    <>
-                      <div className="mt-3">
-                        <EffortBars qualities={item.qualities} />
-                      </div>
+                    {!isExpanded && (
                       <div className="mt-2 text-xs text-stone-300">
                         Projected ≈ {formatNumber(projected.readers)} readers • +{formatNumber(projected.subs)} subs
                       </div>
-                    </>
-                  )}
-                </motion.div>
-              );
-            })}
+                    )}
+
+                    {isExpanded && (
+                      <>
+                        <div className="mt-3">
+                          <EffortBars qualities={item.qualities} />
+                        </div>
+                        <div className="mt-2 text-xs text-stone-300">
+                          Projected ≈ {formatNumber(projected.readers)} readers • +{formatNumber(projected.subs)} subs
+                        </div>
+                      </>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* Published Section */}
-        <div key="published-section">
-          <div className="sticky top-12 bg-stone-900/70 py-2 z-10 mt-6">
-            <div className="text-sm text-stone-300">Published</div>
-          </div>
+          {/* Published Section */}
+          <div key="published-section">
+            <div className="sticky top-12 bg-stone-900/70 py-2 z-10 mt-6">
+              <div className="text-sm text-stone-300">Published</div>
+            </div>
 
-          <div className="mt-3 space-y-3">
-            {published.length === 0 && (
-              <div className="text-stone-400 italic">Nothing published yet—your first hit appears here.</div>
-            )}
+            <div className="mt-3 space-y-3">
+              {published.length === 0 && (
+                <div className="text-stone-400 italic">Nothing published yet—your first hit appears here.</div>
+              )}
 
-            {published.map((item) => {
-              const isExpanded = !!expanded[item.id];
+              {published.map((item) => {
+                const isExpanded = !!expanded[item.id];
 
-              return (
-                <motion.div
-                  key={item.id + "pub"}
-                  onClick={() => toggleExpanded(item.id)}
-                  className={`w-full bg-stone-800/20 rounded border border-stone-700 p-3 transition-transform hover:-translate-y-0.5 cursor-pointer`}
-                  style={{ minHeight: isExpanded ? 96 : 72 }}
-                  initial={{opacity: 0.3, scale: 0.95}}
-                  animate={{opacity: 1, scale: 1}}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <TypeChip text={item.type} />
-                      <div className="text-sm font-semibold text-stone-100 truncate max-w-[220px]">
-                        {item.topic}
+                return (
+                  <motion.div
+                    key={item.id + "pub"}
+                    onClick={() => toggleExpanded(item.id)}
+                    className={`w-full bg-stone-800/20 rounded border border-stone-700 p-3 transition-transform hover:-translate-y-0.5 cursor-pointer`}
+                    style={{ minHeight: isExpanded ? 96 : 72 }}
+                    initial={{ opacity: 0.3, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <TypeChip text={item.type} />
+                        <div className="text-sm font-semibold text-stone-100 truncate max-w-[220px]">
+                          {item.topic}
+                        </div>
+                      </div>
+                      <div className="text-xs text-stone-400">
+                        {/* rough time display using tick - publishTick */}
+                        {(() => {
+                          const ageTicks = Math.max(0, tick - item.publishTick);
+                          const days = Math.floor(ageTicks / TICKS_PER_DAY);
+                          if (days >= 365) {
+                            const years = Math.floor(days / 365);
+                            return `${years}yr ago`;
+                          }
+                          if (days >= DAYS_PER_MONTH) {
+                            const months = Math.floor(days / DAYS_PER_MONTH);
+                            return `${months}mo ago`;
+                          }
+                          if (days === 0) return 'Today';
+                          if (days === 1) return 'Yesterday';
+                          return `${days}d ago`;
+                        })()}
                       </div>
                     </div>
-                    <div className="text-xs text-stone-400">
-                      {/* rough time display using tick - publishTick */}
-                      {(() => {
-                        const ageTicks = Math.max(0, tick - item.publishTick);
-                        const days = Math.floor(ageTicks / TICKS_PER_DAY);
-                        if (days >= 365) {
-                          const years = Math.floor(days / 365);
-                          return `${years}yr ago`;
-                        }
-                        if (days >= DAYS_PER_MONTH) {
-                          const months = Math.floor(days / DAYS_PER_MONTH);
-                          return `${months}mo ago`;
-                        }
-                        if (days === 0) return 'Today';
-                        if (days === 1) return 'Yesterday';
-                        return `${days}d ago`;
-                      })()}
-                    </div>
-                  </div>
 
-                  {/* <MiniEffortBars qualities={item.qualities} /> */}
+                    {/* <MiniEffortBars qualities={item.qualities} /> */}
 
-                  <div className="mt-3 flex items-center gap-4 text-sm flex-wrap text-stone-300">
-                    <div className="flex items-center gap-2" title='Quality'>
-                      <span className="text-amber-300">⭐</span>
-                      <span>{formatNumber(Math.round(item.reception.staticReview.score * 50) / 10)}</span>
-                    </div>
-                    <div className="flex items-center gap-2" title='Revenue'>
-                      <span className="text-amber-300">$</span>
-                      <span>{formatNumber(Math.round(getArticleRevenue(item.id)*100)/100)}</span>
-                    </div>
-                    <div className="flex items-center gap-2" title='Views'>
-                      <span className="text-amber-300">👁</span>
-                      <span>{formatNumber(item.reception.readership)}</span>
-                    </div>
-                    <div className="flex items-center gap-2" title='Subscribers'>
-                      <span className="text-amber-300">📜</span>
-                      <span>{formatNumber(item.reception.newSubscribers)}</span>
-                    </div>
-                  </div>
-
-                  {isExpanded && (
-                    <>
-                      <div className="mt-2 flex flex-wrap">
-                        {
-                           item.reception.staticReview.insights.map((t) => <InsightTag key={t} text={t} />)
-                        }
+                    <div className="mt-3 flex items-center gap-4 text-sm flex-wrap text-stone-300">
+                      <div className="flex items-center gap-2" title='Quality'>
+                        <span className="text-amber-300">⭐</span>
+                        <span>{formatNumber(Math.round(item.reception.staticReview.score * 50) / 10)}</span>
                       </div>
-                      <div className="mt-3">
-                        <EffortBars qualities={item.qualities} />
+                      <div className="flex items-center gap-2" title='Revenue'>
+                        <span className="text-amber-300">$</span>
+                        <span>{formatNumber(Math.round(getArticleRevenue(item.id) * 100) / 100)}</span>
                       </div>
-                    </>
-                  )}
-                </motion.div>
-              );
-            })}
+                      <div className="flex items-center gap-2" title='Views'>
+                        <span className="text-amber-300">👁</span>
+                        <span>{formatNumber(item.reception.readership)}</span>
+                      </div>
+                      <div className="flex items-center gap-2" title='Subscribers'>
+                        <span className="text-amber-300">📜</span>
+                        <span>{formatNumber(item.reception.newSubscribers)}</span>
+                      </div>
+                    </div>
+
+
+                    {isExpanded && (
+                      <>
+                        {item.content?.dek && (
+                          <span className='text-xs text-stone-300 mt-2 inline-block italic'>
+                            {item.content.dek}
+                          </span>
+                        )}
+                        {item.reception.headlineReview && (
+                          <div className="mt-3">
+                            {item.reception.headlineReview.type_similarity}
+                          </div>
+                        )}
+                        <div className="flex flex-wrap">
+                          {
+                            item.reception.staticReview.insights.map((t) => <InsightTag key={t} text={t} />)
+                          }
+                        </div>
+                        <div className="mt-3">
+                          <EffortBars qualities={item.qualities} />
+                        </div>
+                      </>
+                    )}
+
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
-        </div>
         </AnimatePresence>
       </div>
-      
+
     </aside>
   );
 }

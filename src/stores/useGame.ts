@@ -4,6 +4,7 @@ import type { Article, DraftArticle } from '../types/article';
 import { calculateReception } from '../sim/scoring';
 import { DAYS_PER_MONTH, PUBLISH_DUR_TICKS, TICKS_PER_MONTH, TICKS_PER_DAY, REVENUE_VIEWS } from '../sim/constants';
 import { getRandomRatName, type Writer } from '../types/writer';
+import { generateArticle, rateHeadline } from '../utils/articleApi';
 
 interface GameState {
   cash: number
@@ -199,12 +200,81 @@ export const useGame = create<GameState & GameActions>()(
             status: 'pending',
             publishTick: s.tick + PUBLISH_DUR_TICKS,
             reception,
+            generationStatus: 'queued',
           }
         },
         cash: s.cash - COST_ARTICLE_PUBLISH
       }));
-      // async: send to RNN backend
-      // rnnApi.publish(draft).catch(rollback)
+
+      // Fire-and-forget: send to Article Generation API and update article when ready
+      (async () => {
+        try {
+          // mark generating
+          set(s => ({
+            articles: {
+              ...s.articles,
+              [id]: {
+                ...s.articles[id],
+                generationStatus: 'generating',
+              }
+            }
+          }));
+
+          // start both requests in parallel
+          const genPromise = generateArticle(draft, get().publicationName, 0.5);
+          const ratePromise = rateHeadline(draft.topic, draft.type);
+
+          const [genResult, rateResult] = await Promise.allSettled([genPromise, ratePromise]);
+
+          let content = undefined;
+          let writtenReviews = undefined;
+          let headlineRating = undefined;
+
+          if (genResult.status === 'fulfilled') {
+            const data = genResult.value;
+            content = data?.article ? { dek: data.article.dek ?? '', body: data.article.body ?? '' } : undefined;
+            writtenReviews = data?.written_reviews ?? data?.reviews ?? undefined;
+          } else {
+            console.warn('Article generation failed or rejected:', genResult.reason);
+          }
+
+          if (rateResult.status === 'fulfilled') {
+            headlineRating = rateResult.value;
+          } else {
+            console.warn('Headline rating failed or rejected:', rateResult.reason);
+          }
+
+          const genFailed = genResult.status !== 'fulfilled';
+
+          set(s => ({
+            articles: {
+              ...s.articles,
+              [id]: {
+                ...s.articles[id],
+                content: content ?? s.articles[id].content,
+                reception: {
+                  ...s.articles[id].reception,
+                  writtenReviews: writtenReviews ?? s.articles[id].reception.writtenReviews,
+                  headlineReview: headlineRating ?? s.articles[id].reception.headlineReview,
+                },
+                generationStatus: genFailed ? 'failed' : 'ready'
+              }
+            }
+          }));
+        } catch (err) {
+          console.error('Unexpected error generating article:', err);
+          set(s => ({
+            articles: {
+              ...s.articles,
+              [id]: {
+                ...s.articles[id],
+                generationStatus: 'failed'
+              }
+            }
+          }));
+        }
+      })();
+
     },
 
     researchTech(techId: string) {
@@ -221,4 +291,3 @@ export const useGame = create<GameState & GameActions>()(
     },
   }), { name: 'rnn-save' })
 );
-
