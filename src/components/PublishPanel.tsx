@@ -76,13 +76,6 @@ export default function PublishPanel({
 
   const [qualities, setQualities] = useState<QualityScores>(getInitialQualities());
 
-  const total = useMemo(() => {
-    return Object.values(qualities).reduce(
-      (total, group) => total + Object.values(group).reduce((a, b) => a + b, 0),
-      0
-    );
-  }, [qualities]);
-
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -165,20 +158,6 @@ export default function PublishPanel({
         aria-modal="true"
         className="w-full bg-stone-900 text-stone-100 rounded p-4 shadow-lg"
       >
-        <div className="flex items-start justify-between gap-4">
-          <h3 className="text-lg font-bold">New Article</h3>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-stone-300">Effort used: {total}/300</span>
-            <button
-              onClick={onClose}
-              className="text-stone-300 hover:text-white px-2 py-1 rounded"
-              aria-label="Close"
-            >
-              ✕
-            </button>
-          </div>
-        </div>
-
         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="text-sm text-stone-300">Topic <span className="text-xs text-stone-400">({topic.length}/30)</span></label>

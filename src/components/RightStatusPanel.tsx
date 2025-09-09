@@ -172,9 +172,9 @@ export default function RightStatusPanel() {
 
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold">Articles</h3>
-        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
           <button
-            onClick={() => bus.emit('openPublish', undefined)}
+            onClick={() => bus.emit('openView', { name: 'publish' })}
             className="px-3 py-1 bg-yellow-400 text-stone-900 rounded text-sm font-medium shadow"
           >
             New Article

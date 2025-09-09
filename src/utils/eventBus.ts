@@ -1,6 +1,7 @@
 type EventMap = {
   openPublish: undefined;
   closePublish: undefined;
+  openView: any;
   // extend with more UI events as needed, e.g. subscriberPlus: { amount: number }
 };
 
@@ -14,6 +15,8 @@ const listeners: Partial<Record<keyof EventMap, ListenerAny[]>> = {};
 
 export const bus = {
   on<K extends keyof EventMap>(evt: K, fn: (payload: EventMap[K]) => void) {
+    console.debug('[bus.on]', String(evt));
+
     listeners[evt] = listeners[evt] ?? [];
     (listeners[evt] as ListenerAny[]).push(fn as ListenerAny);
     return () => {
@@ -26,6 +29,8 @@ export const bus = {
   },
 
   emit<K extends keyof EventMap>(evt: K, payload: EventMap[K]) {
+    console.debug('[bus.emit]', String(evt), payload);
+
     (listeners[evt] ?? []).slice().forEach((fn) => (fn as (p: EventMap[K]) => void)(payload));
   },
 };

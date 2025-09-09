@@ -50,4 +50,4 @@ export type Article = {
   stats?: Stats;
 };
 
-export type DraftArticle = Omit<Article, 'id' | 'reception' | 'publishTick' | 'stats'>;
+export type DraftArticle = Omit<Article, 'id' | 'reception' | 'publishTick' | 'stats' | 'generationStatus' | 'content'>;
