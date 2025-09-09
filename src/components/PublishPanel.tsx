@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import SliderRow from './SliderRow';
 import { ARTICLE_TYPES, type DraftArticle, type ArticleType } from '../types/article';
 
+const MAX_TOPIC_LENGTH = 60;
 interface PublishPanelProps {
   onPublish: (draft: DraftArticle) => void;
   onClose: () => void;
@@ -91,7 +92,7 @@ export default function PublishPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic, category, type, qualities]);
 
-  const canSubmit = topic.trim().length > 0 && topic.trim().length <= 30;
+  const canSubmit = topic.trim().length > 0 && topic.trim().length <= MAX_TOPIC_LENGTH;
 
   function setSliderValue(groupKey: string, sliderKey: string, newValue: number) {
     setQualities(prevQualities => {
@@ -160,13 +161,13 @@ export default function PublishPanel({
       >
         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-sm text-stone-300">Topic <span className="text-xs text-stone-400">({topic.length}/30)</span></label>
+            <label className="text-sm text-stone-300">Topic <span className="text-xs text-stone-400">({topic.length}/{MAX_TOPIC_LENGTH})</span></label>
             <input
               value={topic}
               onChange={(e) => {
                 const v = e.target.value;
-                if (v.length <= 30) setTopic(v);
-                else setTopic(v.slice(0, 30));
+                if (v.length <= MAX_TOPIC_LENGTH) setTopic(v);
+                else setTopic(v.slice(0, MAX_TOPIC_LENGTH));
               }}
               className="w-full mt-1 px-2 py-2 bg-stone-800 border border-stone-700 rounded text-stone-100"
               placeholder="Write a catchy headline..."
