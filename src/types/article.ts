@@ -12,7 +12,11 @@ export type Qualities = {
 
 export type ArticleScore = {
   score: number
-  categories: Record<keyof Qualities, number>
+  categories: {
+    [K in keyof Qualities]: {
+      [P in keyof Qualities[K]]: number;
+    }
+  }
   insights: string[]
 }
 

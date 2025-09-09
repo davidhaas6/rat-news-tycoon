@@ -5,65 +5,60 @@ const BASE_SUBSCRIBER_READERSHIP_RATIO = 0.5;
 const BONUS_SUBSCRIBER_READERSHIP_RATIO = 0.5;
 const BASE_AUDIENCE = 10000;
 const MAX_CONVERSION_RATE = 0.01;
-
-
-// Type for the Gaussian parameters { mean, sigma }
 type GaussianParams = { mean: number; sigma: number };
 
-// Recursive type to replace every 'number' in Qualities with 'GaussianParams'
 type SweetSpotQualities = {
   [K in keyof Qualities]: {
     [P in keyof Qualities[K]]: GaussianParams;
   };
 };
 
-// The final data structure type
 type SweetSpots = Record<ArticleType, SweetSpotQualities>;
 
 const sweetSpots: SweetSpots = {
   entertainment: {
     investigation: {
-      background: { mean: 60, sigma: 25 },
+      background: { mean: 60, sigma: 20 },
       original: { mean: 30, sigma: 20 },
-      factCheck: { mean: 10, sigma: 15 },
+      factCheck: { mean: 10, sigma: 20 },
     },
     writing: {
-      engagement: { mean: 75, sigma: 10 },
+      engagement: { mean: 75, sigma: 20 },
       depth: { mean: 25, sigma: 20 },
     },
     publishing: {
-      editing: { mean: 30, sigma: 20 },
-      visuals: { mean: 70, sigma: 15 },
+      editing: { mean: 30, sigma: 30 },
+      visuals: { mean: 70, sigma: 30 },
     },
   },
   listicle: {
     investigation: {
       background: { mean: 60, sigma: 20 },
-      original: { mean: 5, sigma: 10 },
+      original: { mean: 5, sigma: 20 },
       factCheck: { mean: 45, sigma: 20 },
     },
     writing: {
-      engagement: { mean: 95, sigma: 5 },
-      depth: { mean: 5, sigma: 10 },
+      engagement: { mean: 95, sigma: 30 },
+      depth: { mean: 5, sigma: 30 },
     },
     publishing: {
-      editing: { mean: 15, sigma: 10 },
-      visuals: { mean: 85, sigma: 10 },
+      editing: { mean: 15, sigma: 20 },
+      visuals: { mean: 85, sigma: 20 },
     },
   },
   science: {
     investigation: {
       background: { mean: 40, sigma: 20 },
-      original: { mean: 30, sigma: 25 },
-      factCheck: { mean: 35, sigma: 10 },
+      original: { mean: 30, sigma: 20 },
+      factCheck: { mean: 35, sigma: 20 },
     },
     writing: {
       engagement: { mean: 30, sigma: 20 },
-      depth: { mean: 70, sigma: 10 },
+      depth: { mean: 70, sigma: 20 },
     },
     publishing: {
-      editing: { mean: 80, sigma: 15 },
-      visuals: { mean: 20, sigma: 25 },
+      editing: { mean: 80, sigma: 20 },
+      visuals: { mean: 20, sigma: 20 },
     },
   },
   breaking: {
@@ -84,16 +79,23 @@ const sweetSpots: SweetSpots = {
 };
 
 
+function setSubScore<G extends keyof Qualities, Q extends keyof Qualities[G]>(
+  categoriesObj: Qualities, g: G, q: Q, v: number
+): void {
+  // Use a narrow internal assertion to satisfy the compiler while preserving a strongly-typed API.
+  (categoriesObj[g] as any)[q] = v;
+}
+
 function calculateArticleScore(draft: DraftArticle): ArticleScore {
   const targets = sweetSpots[draft.type];
-  const insights = [];
-  const scores: Record<keyof Qualities, number> = {
-    investigation: 0,
-    writing: 0,
-    publishing: 0,
+  const insights: string[] = [];
+
+  const categories: Qualities = {
+    investigation: { background: 0, original: 0, factCheck: 0 },
+    writing: { engagement: 0, depth: 0 },
+    publishing: { editing: 0, visuals: 0 },
   };
 
-  // Calculate a score (0-1) for each quality group based on Gaussian match
   let cumulativeQualityScore = 0;
   const numQualityGroups = Object.keys(targets).length;
   for (const groupKey in targets) {
@@ -106,36 +108,34 @@ function calculateArticleScore(draft: DraftArticle): ArticleScore {
       const quality = qualityKey as keyof typeof qualities;
       const draftValue = draft.qualities[group][quality];
       const { mean, sigma } = targets[group][quality];
+      const subScore = matchGaussian(draftValue, mean, sigma);
 
-      groupScore += matchGaussian(draftValue, mean, sigma);
+      setSubScore(categories, group, quality, subScore);
+      groupScore += subScore;
       qualityCount++;
     }
-    // Average the scores for the group
-    if (qualityCount > 0) {
-      scores[group] = groupScore / qualityCount;
-      cumulativeQualityScore += scores[group] / numQualityGroups;
 
-      if (Math.random() < 0.5) { // coin flip for fun
-        if (scores[group] > 0.9) {
-          insights.push(`Top-Cheese ${group}`);
-        } else if (scores[group] > 0.6) {
-          insights.push(`Zesty ${group}`);
-        } else if (scores[group] > 0.4) {
-          insights.push(`Scrappy ${group}`);
-        } else if (scores[group] < 0.3) {
-          insights.push(`Crummy ${group}`);
-        }
+    if (qualityCount > 0) {
+      const groupAvg = groupScore / qualityCount;
+      cumulativeQualityScore += groupAvg / numQualityGroups;
+
+      if (Math.random() < 0.5) {
+        if (groupAvg > 0.9) insights.push(`Top-Cheese ${group}`);
+        else if (groupAvg > 0.6) insights.push(`Zesty ${group}`);
+        else if (groupAvg > 0.4) insights.push(`Scrappy ${group}`);
+        else if (groupAvg < 0.3) insights.push(`Crummy ${group}`);
       }
     }
   }
 
-  console.log(`[scoreArticle] Scores for ${draft.type} "${draft.topic}":`, scores);
   return {
     score: cumulativeQualityScore,
-    categories: scores,
-    insights: insights
+    categories,
+    insights,
   };
 }
+
+
 
 
 export function calculateReception(draft: DraftArticle, subscribers: number): Reception {
