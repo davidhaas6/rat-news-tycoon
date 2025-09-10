@@ -17,6 +17,8 @@ interface GameState {
   tickSpeed: number
   paused: boolean
   revenues: Record<string, number>
+
+  userReadArticles: Set<string> // ui variable: tracks which articles have been viewed by the user
 }
 
 interface GameActions {
@@ -28,6 +30,7 @@ interface GameActions {
   getTotalViews: () => number
   getMonthlyRevenue: () => number
   getArticleRevenue: (id: string) => number
+  hasBeenRead: (id: string) => boolean
 
   // Actions
   hireWriter(): void
@@ -42,6 +45,7 @@ interface GameActions {
   setTickSpeed: (speed: number) => void
   setPaused: (flag: boolean) => void
   togglePaused: () => void
+  markArticleRead: (id: string) => void
 }
 
 
@@ -53,6 +57,7 @@ const INIT_STATE: GameState = {
   researchPts: 0,
   subscribers: 0,
   revenues: {},
+  userReadArticles: new Set(),
 
   publicationName: "Rat News Corp",
   tickSpeed: 2,
@@ -78,6 +83,9 @@ export const useGame = create<GameState & GameActions>()(
     },
     togglePaused() {
       set(s => ({ paused: !s.paused }));
+    },
+    hasBeenRead(id: string) {
+      return get().userReadArticles.has(id);
     },
     getHireWriterCost() {
       return COST_WRITER_INITIAL
@@ -302,5 +310,13 @@ export const useGame = create<GameState & GameActions>()(
         console.warn('Failed to clear persisted game save', err);
       }
     },
+    markArticleRead(id: string) {
+      set(s => {
+        if (!(id in s.articles) || s.userReadArticles.has(id)) return {};
+        return {
+          userReadArticles: new Set([...s.userReadArticles, id])
+        }
+      })
+    }
   }), { name: 'rnn-save' })
 );

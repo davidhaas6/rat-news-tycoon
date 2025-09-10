@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useGame } from '../../stores/useGame';
 import type { Article } from '../../types/article';
 
@@ -57,7 +58,15 @@ function InsightTag({ text }: { text: string }) {
 
 export default function ArticleView({ id }: Props) {
   const article = useGame((s) => s.articles[id]) as Article | undefined;
+  const markArticleRead = useGame((s) => s.markArticleRead);
   const getArticleRevenue = useGame((s) => s.getArticleRevenue);
+
+  useEffect(() => {
+    if (article) {
+      markArticleRead(article.id);
+    }
+  }, [article, markArticleRead]);
+
 
   if (!article) {
     return (
@@ -87,11 +96,23 @@ export default function ArticleView({ id }: Props) {
           {dek ? <p className="mt-2 text-stone-300">{dek}</p> : null}
         </div>
 
+
         <div className="text-right">
           <div className="mt-1 inline-block px-2 py-1 rounded-full bg-amber-400 text-black text-sm font-semibold">
             {article.status.toUpperCase()}
           </div>
         </div>
+      </div>
+
+
+      <div className="mt-4 max-w-none">
+        {body ? (
+          <div className="whitespace-pre-wrap leading-relaxed text-sm text-stone-300">
+            {body}
+          </div>
+        ) : (
+          <p className="text-sm text-stone-400">Content is being generated — check back soon.</p>
+        )}
       </div>
 
       <div className="mt-4 flex items-center gap-6 text-sm text-stone-300 flex-wrap">
@@ -133,16 +154,6 @@ export default function ArticleView({ id }: Props) {
       )}
 
       <EffortBars qualities={article.qualities} />
-
-      <div className="mt-4 prose prose-invert max-w-none">
-        {body ? (
-          <div className="whitespace-pre-wrap leading-relaxed text-sm">
-            {body}
-          </div>
-        ) : (
-          <p className="text-sm text-stone-400">Content is being generated — check back soon.</p>
-        )}
-      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { DAYS_PER_MONTH, PUBLISH_DUR_TICKS, TICKS_PER_DAY } from '../sim/constan
 import { createNoise2D } from 'simplex-noise';
 import { bus } from '../utils/eventBus';
 import { AnimatePresence, motion } from 'motion/react';
-import { i } from 'motion/react-client';
+import { IconNewsPaperEmpty, IconNewsPaper } from './Icons';
 
 
 /**
@@ -133,6 +133,8 @@ export default function RightStatusPanel() {
   const tick = useGame((s) => s.tick);
   const paused = useGame((s) => s.paused);
   const getArticleRevenue = useGame((s) => s.getArticleRevenue);
+  const hasBeenRead = useGame((s) => s.hasBeenRead);
+
 
 
   // Keep track of expanded state per-article. Start compact by default -> expanded=false.
@@ -173,7 +175,7 @@ export default function RightStatusPanel() {
 
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-lg font-semibold">Articles</h3>
-          <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => bus.emit('openView', { name: 'publish' })}
             className="px-3 py-1 bg-yellow-400 text-stone-900 rounded text-sm font-medium shadow"
@@ -274,8 +276,8 @@ export default function RightStatusPanel() {
                 return (
                   <motion.div
                     key={item.id + "pub"}
-                    // onClick={() => toggleExpanded(item.id)}
-                    onClick={() => bus.emit('openView', { name: 'article', id: item.id })}
+                    onClick={() => toggleExpanded(item.id)}
+                    // onClick={() => bus.emit('openView', { name: 'article', id: item.id })}
                     className={`w-full bg-stone-800/20 rounded border border-stone-700 p-3 transition-transform hover:-translate-y-0.5 cursor-pointer`}
                     style={{ minHeight: isExpanded ? 96 : 72 }}
                     initial={{ opacity: 0.3, scale: 0.95 }}
@@ -283,33 +285,25 @@ export default function RightStatusPanel() {
                     transition={{ duration: 0.2 }}
                   >
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-1 min-w-0"> {/* left-aligns the chip and title */}
                         <TypeChip text={item.type} />
-                        <div className="text-sm font-semibold text-stone-100 truncate max-w-[220px]">
+                        <span className="text-sm font-semibold text-stone-100 truncate">
                           {item.topic}
-                        </div>
+                        </span>
                       </div>
-                      <div className="text-xs text-stone-400">
-                        {/* rough time display using tick - publishTick */}
-                        {(() => {
-                          const ageTicks = Math.max(0, tick - item.publishTick);
-                          const days = Math.floor(ageTicks / TICKS_PER_DAY);
-                          if (days >= 365) {
-                            const years = Math.floor(days / 365);
-                            return `${years}yr ago`;
-                          }
-                          if (days >= DAYS_PER_MONTH) {
-                            const months = Math.floor(days / DAYS_PER_MONTH);
-                            return `${months}mo ago`;
-                          }
-                          if (days === 0) return 'Today';
-                          if (days === 1) return 'Yesterday';
-                          return `${days}d ago`;
-                        })()}
-                      </div>
+
+                      <motion.div
+                        whileTap={{ scale: 0.9 }}
+                        whileHover={{ scale: 1.2 }}
+                        key={"expand-btn-" + item.id}
+                        onClick={() => bus.emit('openView', { name: 'article', id: item.id })}
+                        className="px-2 py-1 rounded text-sm font-medium shadow"
+                      >
+                        {hasBeenRead(item.id) ? <IconNewsPaperEmpty /> : <IconNewsPaper />}
+                      </motion.div>
+
                     </div>
 
-                    {/* <MiniEffortBars qualities={item.qualities} /> */}
 
                     <div className="mt-3 flex items-center gap-4 text-sm flex-wrap text-stone-300">
                       <div className="flex items-center gap-2" title='Quality'>
@@ -333,16 +327,31 @@ export default function RightStatusPanel() {
 
                     {isExpanded && (
                       <>
+                        <div className="text-xs text-stone-400 mt-2">
+                          {'Published ' + (() => {
+                            /* rough time display using tick - publishTick */
+                            const ageTicks = Math.max(0, tick - item.publishTick);
+                            const days = Math.floor(ageTicks / TICKS_PER_DAY);
+                            if (days >= 365) {
+                              const years = Math.floor(days / 365);
+                              return `${years} year${years === 1 ? '' : 's'} ago`;
+                            }
+                            if (days >= DAYS_PER_MONTH) {
+                              const months = Math.floor(days / DAYS_PER_MONTH);
+                              return `${months} month${months === 1 ? '' : 's'} ago`;
+                            }
+                            if (days === 0) return 'Today';
+                            if (days === 1) return 'Yesterday';
+                            return `${days} days ago`;
+                          })()}
+                        </div>
+
                         {item.content?.dek && (
-                          <span className='text-xs text-stone-300 mt-2 inline-block italic'>
+                          <span className='text-xs text-stone-300 mt-2 inline-block'>
                             {item.content.dek}
                           </span>
                         )}
-                        {item.reception.headlineReview && (
-                          <div className="mt-3">
-                            {item.reception.headlineReview.type_similarity}
-                          </div>
-                        )}
+
                         <div className="flex flex-wrap">
                           {
                             item.reception.staticReview.insights.map((t) => <InsightTag key={t} text={t} />)
@@ -351,6 +360,8 @@ export default function RightStatusPanel() {
                         <div className="mt-3">
                           <EffortBars qualities={item.qualities} />
                         </div>
+
+
                       </>
                     )}
 
