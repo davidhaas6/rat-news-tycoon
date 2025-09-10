@@ -35,15 +35,15 @@ const sweetSpots: SweetSpots = {
     investigation: {
       background: { mean: 60, sigma: 20 },
       original: { mean: 5, sigma: 20 },
-      factCheck: { mean: 45, sigma: 20 },
+      factCheck: { mean: 35, sigma: 20 },
     },
     writing: {
       engagement: { mean: 95, sigma: 30 },
       depth: { mean: 5, sigma: 30 },
     },
     publishing: {
-      editing: { mean: 15, sigma: 20 },
-      visuals: { mean: 85, sigma: 20 },
+      editing: { mean: 20, sigma: 20 },
+      visuals: { mean: 80, sigma: 20 },
     },
   },
   science: {
@@ -141,10 +141,10 @@ function calculateArticleScore(draft: DraftArticle): ArticleScore {
 export function calculateReception(draft: DraftArticle, subscribers: number): Reception {
   const articleReview = calculateArticleScore(draft);
   const sliderScore = articleReview.score;
-  const max_audience = BASE_AUDIENCE + subscribers * 5;
+  const max_audience = BASE_AUDIENCE + subscribers * 50;
 
   // Viral readership grows quadratically with score
-  let viralReads = max_audience * sliderScore * sliderScore;
+  let viralReads = max_audience * sliderScore ** 2;
   viralReads *= 1 + (Math.random() - 0.5) / 5;
 
   // Subscriber readership is a mix of base + score-driven bonus
