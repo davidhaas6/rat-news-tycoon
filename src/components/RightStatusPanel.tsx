@@ -158,8 +158,8 @@ export default function RightStatusPanel() {
 
   function projectedFromReception(readership: number, newSubscribers: number) {
     // small random offset for preview. Keep within reasonable bounds.
-    const randLoc = Math.floor(tick / 4)
-    const rOffset = Math.floor(readership * (noiseR(randLoc / 100, 0)) * 0.25);
+    const randLoc = Math.floor(tick / 1)
+    const rOffset = Math.floor(readership * (noiseR(randLoc / 20, 0)) * 0.5);
     const sOffset = Math.floor(newSubscribers * (noiseS(randLoc / 50, 0)) * 0.5);
     return {
       readers: Math.max(0, readership + rOffset),

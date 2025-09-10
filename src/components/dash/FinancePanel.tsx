@@ -35,12 +35,12 @@ export default function FinancePanel() {
 
         <li key="Subscribers" className="flex justify-between items-baseline">
           <span className="text-sm text-stone-300">Subscribers</span>
-          <span className="font-semibold">{subscribers}</span>
+          <span className="font-semibold">{subscribers} rat{subscribers === 1 ? '' : 's'}</span>
         </li>
 
         <li key="Employees" className="flex justify-between items-baseline">
           <span className="text-sm text-stone-300">Staff</span>
-          <span className="font-semibold">{writers.length} rats</span>
+          <span className="font-semibold">{writers.length} rat{writers.length === 1 ? '' : 's'}</span>
         </li>
 
         <li key="Income" className="flex justify-between items-baseline">

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useGame } from '../../stores/useGame';
 import type { Article } from '../../types/article';
 
@@ -89,7 +88,6 @@ export default function ArticleView({ id }: Props) {
         </div>
 
         <div className="text-right">
-          <div className="text-xs text-stone-400">Status</div>
           <div className="mt-1 inline-block px-2 py-1 rounded-full bg-amber-400 text-black text-sm font-semibold">
             {article.status.toUpperCase()}
           </div>
