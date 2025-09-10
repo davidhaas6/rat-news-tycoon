@@ -127,7 +127,7 @@ function InsightTag({ text }: { text: string }) {
   return <span className="inline-block text-xs px-2 py-1 mr-2 mt-2 rounded-md bg-stone-800 text-stone-200">{text}</span>;
 }
 
-export default function RightStatusPanel() {
+export default function ArticlePanel() {
   // subscribe to store values
   const articlesRecord = useGame((s) => s.articles);
   const tick = useGame((s) => s.tick);
@@ -170,7 +170,7 @@ export default function RightStatusPanel() {
   }
 
   return (
-    <aside className="h-full bg-stone-900 text-stone-100 p-4 flex flex-col rounded-lg mx-4 md:ml-0">
+    <aside className="h-full bg-stone-900 text-stone-100 p-4 flex flex-col rounded-lg mx-4 md:mr-0">
       {/* Top header with compact label at top-right by request — we'll show a short hint */}
 
       <div className="flex items-center justify-between mb-3">

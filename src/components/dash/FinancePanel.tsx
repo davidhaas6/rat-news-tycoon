@@ -15,7 +15,7 @@ export default function FinancePanel() {
   const timestamp = useGame(s => s.getTimeStamp)
 
   return (
-    <section className="rounded-lg p-4 bg-stone-900 text-stone-100 shadow-md flex flex-col h-full mx-4 md:mr-0">
+    <section className="rounded-lg p-4 bg-stone-900 text-stone-100 shadow-md flex flex-col h-full mx-4 md:ml-0">
       <header className="mb-3">
         <div className="flex items-baseline justify-between">
           <h2 className="text-lg font-bold">Management</h2>
