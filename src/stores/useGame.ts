@@ -29,13 +29,13 @@ interface GameActions {
   getMonthlyRevenue: () => number
   getArticleRevenue: (id: string) => number
 
-
   // Actions
   hireWriter(): void
   advance(dt: number): void
   publishArticle: (draft: DraftArticle) => void
   researchTech: (techId: string) => void
   reset: () => void
+  _generateArticle: (id: string) => void
 
   // UI / Controls
   setPublicationName: (name: string) => void
@@ -47,7 +47,7 @@ interface GameActions {
 
 const INIT_STATE: GameState = {
   cash: 1000,
-  writers: [{id: crypto.randomUUID(), name: getRandomRatName()}],
+  writers: [{ id: crypto.randomUUID(), name: getRandomRatName() }],
   tick: 0,
   articles: {},
   researchPts: 0,
@@ -85,10 +85,10 @@ export const useGame = create<GameState & GameActions>()(
     hireWriter() {
       const cost = COST_WRITER_INITIAL;
       if (get().cash < cost) return;
-      const writer = {id: crypto.randomUUID(), name: getRandomRatName()};
-      set(s => ({ 
-        cash: s.cash - cost, 
-        writers: [...s.writers,writer]
+      const writer = { id: crypto.randomUUID(), name: getRandomRatName() };
+      set(s => ({
+        cash: s.cash - cost,
+        writers: [...s.writers, writer]
       }
       ));
     },
@@ -207,8 +207,14 @@ export const useGame = create<GameState & GameActions>()(
       }));
 
       // Fire-and-forget: send to Article Generation API and update article when ready
+      get()._generateArticle(id);
+      console.log('done publishing')
+    },
+    _generateArticle: (id: string) => {
       (async () => {
         try {
+          const article = get().articles[id];
+          if (!article) return;
           // mark generating
           set(s => ({
             articles: {
@@ -219,12 +225,11 @@ export const useGame = create<GameState & GameActions>()(
               }
             }
           }));
-
           // start both requests in parallel
-          const genPromise = generateArticle(draft, get().publicationName, 0.5);
-          const ratePromise = rateHeadline(draft.topic, draft.type);
+          const genPromise = generateArticle(article, get().publicationName, 0.5);
+          const headlineEvalPromise = rateHeadline(article.topic, article.type);
 
-          const [genResult, rateResult] = await Promise.allSettled([genPromise, ratePromise]);
+          const [genResult, headlineEvalResult] = await Promise.allSettled([genPromise, headlineEvalPromise]);
 
           let content = undefined;
           let writtenReviews = undefined;
@@ -238,10 +243,10 @@ export const useGame = create<GameState & GameActions>()(
             console.warn('Article generation failed or rejected:', genResult.reason);
           }
 
-          if (rateResult.status === 'fulfilled') {
-            headlineRating = rateResult.value;
+          if (headlineEvalResult.status === 'fulfilled') {
+            headlineRating = headlineEvalResult.value;
           } else {
-            console.warn('Headline rating failed or rejected:', rateResult.reason);
+            console.warn('Headline rating failed or rejected:', headlineEvalResult.reason);
           }
 
           const genFailed = genResult.status !== 'fulfilled';
@@ -274,11 +279,19 @@ export const useGame = create<GameState & GameActions>()(
           }));
         }
       })();
-
     },
-
     researchTech(techId: string) {
       // TODO:
+      // - better generated headlines
+      // - more hints
+      // - better cpm
+      // - better subscriber readership
+      // - more subscribers per view
+      // - less subscriber attrition
+      // - unlock dek
+      // - unlock body
+      // - more hints
+      // - 
       console.log("need to implement researchtech!")
     },
     reset() {
