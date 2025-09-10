@@ -44,7 +44,8 @@ export default function SliderRow({
           onChange={(e) => onChange(Number(e.target.value))}
           className="w-full accent-amber-400 w-full h-2 cursor-pointer"
         />
-        <input
+        <span className='text-lg text-stone-300 font-semibold w-8 text-center'>{value}</span>
+        {/* <input
           aria-label={`${label} value`}
           type="number"
           min={min}
@@ -59,7 +60,7 @@ export default function SliderRow({
             else onChange(v);
           }}
           className="w-16 text-sm bg-stone-700 text-stone-100 rounded px-2 py-1 border border-stone-600"
-        />
+        /> */}
       </div>
     </div>
   );
