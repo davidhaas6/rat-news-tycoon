@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGame } from '../../stores/useGame';
 import PublishPanel from '../PublishPanel';
 import { bus } from '../../utils/eventBus';
@@ -61,22 +61,29 @@ export default function Screen() {
 
   return (
     <section className="rounded-lg min-w-[320px] w-full h-full bg-stone-900 text-stone-100 p-4 mx-4 md:mx-0">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold">{title}</h2>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              // open publish view directly (keeps it local and simple)
-              openerRef.current = document.activeElement as HTMLElement | null;
-              setView({ name: 'publish' });
-            }}
-            className="px-3 py-2 bg-yellow-400 text-stone-900 rounded font-medium shadow"
-          >
-            New Article
-          </button>
-        </div>
-      </div>
 
+
+
+      {view.name === 'base' &&
+        <>
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-bold">{title}</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  // open publish view directly (keeps it local and simple)
+                  openerRef.current = document.activeElement as HTMLElement | null;
+                  setView({ name: 'publish' });
+                }}
+                className="px-3 py-2 bg-yellow-400 text-stone-900 rounded font-medium shadow"
+              >
+                New Article
+              </button>
+            </div>
+          </div>
+          {writers.map((w) => <NewsDesk key={w.id} writer={w} />)}
+        </>
+      }
 
 
       <AnimatePresence>
@@ -84,12 +91,11 @@ export default function Screen() {
           <motion.div
             initial={{ opacity: 0, scale: 0.7 }}
             animate={{ opacity: 1, scale: 1 }}
-            // exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ type: "spring", duration: 0.1 }}
+            transition={{ type: "spring", duration: 0.3 }}
             key={currentKey}
             className="mt-3"
           >
-            <ViewShell onClose={closeToBase}>
+            <ViewShell onClose={closeToBase} title="New Article">
               <PublishPanel
                 onPublish={handlePublish}
                 onClose={closeToBase}
@@ -100,10 +106,9 @@ export default function Screen() {
 
         {view.name === 'employee' && (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            transition={{ type: "spring", duration: 0.25 }}
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", duration: 0.3 }}
             key={currentKey}
             className="mt-3"
           >
@@ -119,10 +124,9 @@ export default function Screen() {
 
         {view.name === 'article' && (
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            // exit={{ opacity: 0, x: -20 }}
-            transition={{ type: "spring", duration: 0.25 }}
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", duration: 0.3 }}
             key={currentKey}
             className="mt-3"
           >
@@ -134,10 +138,9 @@ export default function Screen() {
 
         {view.name === 'settings' && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
+            initial={{ opacity: 0, scale: 0.7 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.2 }}
+            transition={{ type: "spring", duration: 0.3 }}
             key={currentKey}
             className="mt-3"
           >
@@ -151,21 +154,6 @@ export default function Screen() {
           </motion.div>
         )}
 
-        <div className="mt-3">
-        </div>
-
-        {view.name === 'base' &&
-          // <motion.div
-          //   // initial={{ opacity: 0, scale: 0.4 }}
-          //   // animate={{ opacity: 1, scale: 1 }}
-          //   // exit={{ opacity: 0, scale: 0.4 }}
-          //   // transition={{ duration: 0.3 }}
-          //   key={currentKey}
-          //   className="mt-3"
-          // >
-            writers.map((w) => <NewsDesk key={w.id} writer={w} />)
-          // </motion.div>
-        }
       </AnimatePresence>
 
 

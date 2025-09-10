@@ -4,6 +4,7 @@ type ViewShellProps = {
   children: React.ReactNode;
   onClose: () => void;
   className?: string;
+  title?: string;
 };
 
 /**
@@ -12,7 +13,7 @@ type ViewShellProps = {
  *
  * This intentionally stays minimal (no back button) per the user's preference.
  */
-export default function ViewShell({ children, onClose, className = '' }: ViewShellProps) {
+export default function ViewShell({ children, onClose, className = '', title }: ViewShellProps) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -25,14 +26,17 @@ export default function ViewShell({ children, onClose, className = '' }: ViewShe
 
   return (
     <div className={`relative ${className}`}>
-      <div className="absolute top-2 right-2 z-20">
-        <button
-          aria-label="Close"
-          onClick={onClose}
-          className="px-2 py-1 bg-stone-800 text-stone-200 rounded hover:bg-stone-700 focus:outline-none focus:ring"
-        >
-          ✕
-        </button>
+      <div className="flex justify-between items-center px-4">
+        <h1 className="text-2xl font-bold">{title ?? ''}</h1>
+        <div className="flex items-center gap-2">
+          <button
+            aria-label="Close"
+            onClick={onClose}
+            className="px-3 py-1 bg-stone-800 text-stone-200 rounded hover:bg-stone-700 focus:outline-none focus:ring text-xl"
+          >
+            ✕
+          </button>
+        </div>
       </div>
 
       <div>
