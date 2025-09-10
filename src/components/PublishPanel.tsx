@@ -1,8 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import SliderRow from './SliderRow';
 import { ARTICLE_TYPES, type DraftArticle, type ArticleType } from '../types/article';
+import { randomFilledHeadline } from '../sim/madlibs';
+import { IconDice } from './Icons';
 
-const MAX_TOPIC_LENGTH = 60;
+const MAX_TOPIC_LENGTH = 120;
 interface PublishPanelProps {
   onPublish: (draft: DraftArticle) => void;
   onClose: () => void;
@@ -71,10 +73,9 @@ export default function PublishPanel({
   onPublish,
   onClose,
 }: PublishPanelProps) {
-  const [topic, setTopic] = useState('');
   const [category, setCategory] = useState('');
-  const [type, setType] = useState<ArticleType>('entertainment');
-
+  const [type, setType] = useState<ArticleType>();
+  const [topic, setTopic] = useState('');
   const [qualities, setQualities] = useState<QualityScores>(getInitialQualities());
 
   useEffect(() => {
@@ -92,7 +93,7 @@ export default function PublishPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topic, category, type, qualities]);
 
-  const canSubmit = topic.trim().length > 0 && topic.trim().length <= MAX_TOPIC_LENGTH;
+  const canSubmit = type && topic.trim().length > 0 && topic.trim().length <= MAX_TOPIC_LENGTH;
 
   function setSliderValue(groupKey: string, sliderKey: string, newValue: number) {
     setQualities(prevQualities => {
@@ -139,6 +140,13 @@ export default function PublishPanel({
     });
   }
 
+  function onTypeClick(articleType: ArticleType) {
+    if (topic.trim().length === 0) {
+      setTopic(randomFilledHeadline(articleType));
+    }
+    setType(articleType)
+  }
+
   function handleSubmit() {
     if (!canSubmit) return;
     const draft: DraftArticle = {
@@ -159,9 +167,12 @@ export default function PublishPanel({
         aria-modal="true"
         className="w-full bg-stone-900 text-stone-100 rounded p-4 shadow-lg"
       >
-        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="text-sm text-stone-300">Topic <span className="text-xs text-stone-400">({topic.length}/{MAX_TOPIC_LENGTH})</span></label>
+        <div className="flex flex-col">
+          <label className="text-xl text-stone-300 font-semibold">
+            Headline <span className="text-xs text-stone-400">({topic.length}/{MAX_TOPIC_LENGTH})</span>
+          </label>
+          <div className='flex flex-row border border-stone-700 w-full mt-2 px-2 py-1 bg-stone-800 rounded text-stone-100 focus:outline-none  focus:border-amber-400 focus:ring-0'>
+
             <input
               value={topic}
               onChange={(e) => {
@@ -169,28 +180,19 @@ export default function PublishPanel({
                 if (v.length <= MAX_TOPIC_LENGTH) setTopic(v);
                 else setTopic(v.slice(0, MAX_TOPIC_LENGTH));
               }}
-              className="w-full mt-1 px-2 py-2 bg-stone-800 border border-stone-700 rounded text-stone-100"
+              className="flex-grow-2 text-stone-100 focus:outline-none"
               placeholder="Write a catchy headline..."
               required
             />
+            <button className='p-1 active:'
+              onClick={() => setTopic(randomFilledHeadline(type ?? 'entertainment'))}>
+              <IconDice size={24} />
+            </button>
           </div>
 
-          <div>
-            <label className="text-sm text-stone-300">Category <span className="text-xs text-stone-400">({category.length}/10)</span></label>
-            <input
-              value={category}
-              onChange={(e) => {
-                const v = e.target.value;
-                if (v.length <= 10) setCategory(v);
-                else setCategory(v.slice(0, 10));
-              }}
-              className="w-full mt-1 px-2 py-2 bg-stone-800 border border-stone-700 rounded text-stone-100"
-              placeholder="Optional"
-            />
-          </div>
 
-          <div className="sm:col-span-2">
-            <label className="text-sm text-stone-300">Type</label>
+          <div className="sm:col-span-2 mt-8">
+            <label className="text-xl text-stone-300 font-semibold">Genre</label>
             <div className="mt-2 flex flex-wrap gap-2">
               {ARTICLE_TYPES.map((item) => {
                 const variants = {
@@ -203,7 +205,7 @@ export default function PublishPanel({
                   <button
                     key={item}
                     type="button"
-                    onClick={() => setType(item)}
+                    onClick={() => onTypeClick(item)}
                     className={`px-3 py-1.5 text-sm rounded-md transition-colors ${variants[variant]}`}
                   >
                     {item.charAt(0).toUpperCase() + item.slice(1)}
@@ -214,10 +216,11 @@ export default function PublishPanel({
           </div>
         </div>
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-8 space-y-3">
+          {/* <div className="text-xl text-stone-300 font-semibold mb-2">Work</div> */}
           {sliderGroups.map((group) => (
             <div key={group.key} className='flex flex-col gap-2'>
-              <p className="text-xl text-stone-300 font-semibold">{group.label}</p>
+              <p className="text-lg text-stone-300 font-semibold">{group.label}</p>
               {group.sliders.map((slider) => (
                 <SliderRow
                   key={slider.key}
@@ -241,9 +244,8 @@ export default function PublishPanel({
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className={`px-4 py-2 rounded font-medium ${
-              canSubmit ? 'bg-yellow-400 text-stone-900 hover:brightness-90' : 'bg-stone-600 text-stone-400 cursor-not-allowed'
-            }`}
+            className={`px-4 py-2 rounded font-medium ${canSubmit ? 'bg-yellow-400 text-stone-900 hover:brightness-90' : 'bg-stone-600 text-stone-400 !cursor-not-allowed'
+              }`}
           >
             Publish
           </button>
