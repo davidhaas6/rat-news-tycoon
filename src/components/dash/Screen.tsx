@@ -60,33 +60,36 @@ export default function Screen() {
   })();
 
   return (
-    <section className="rounded-lg min-w-[320px] w-full h-full bg-stone-900 text-stone-100 p-4 mx-4 md:mx-0">
-
-
-
-      {view.name === 'base' &&
-        <>
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold">{title}</h2>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => {
-                  // open publish view directly (keeps it local and simple)
-                  openerRef.current = document.activeElement as HTMLElement | null;
-                  setView({ name: 'publish' });
-                }}
-                className="px-3 py-2 bg-yellow-400 text-stone-900 rounded font-medium shadow"
-              >
-                New Article
-              </button>
-            </div>
-          </div>
-          {writers.map((w) => <NewsDesk key={w.id} writer={w} />)}
-        </>
-      }
-
+    <section className="rounded-lg h-full bg-stone-900 text-stone-100 p-4 mx-4 md:mx-0">
 
       <AnimatePresence>
+
+        {view.name === 'base' &&
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ type: "spring", duration: 0, delay: 0.01 }}
+            key={currentKey}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold">{title}</h2>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    // open publish view directly (keeps it local and simple)
+                    openerRef.current = document.activeElement as HTMLElement | null;
+                    setView({ name: 'publish' });
+                  }}
+                  className="px-3 py-2 bg-yellow-400 text-stone-900 rounded font-medium shadow"
+                >
+                  New Article
+                </button>
+              </div>
+            </div>
+            {writers.map((w) => <NewsDesk key={w.id} writer={w} />)}
+          </motion.div>
+        }
+
         {view.name === 'publish' && (
           <motion.div
             initial={{ opacity: 0, scale: 0.7 }}

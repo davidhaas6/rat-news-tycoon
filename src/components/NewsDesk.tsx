@@ -13,6 +13,9 @@ const NewsDesk: FunctionComponent<NewsDeskProps> = (props: NewsDeskProps) => {
     dragConstraints={{ left: 5, right: 5, top: 5, bottom: 5 }}
     whileHover={{ scale: 1.2 }}
     whileTap={{ scale: 0.9, opacity: 0.8, }}
+    initial={{scale:0}}
+    animate={{scale:1}}
+    transition={{ delay: 0.05}}
   key={"news-desk-" + props.writer.id}
   className="size-50 m-5 p-2 rounded text-amber-200 bg-[url('/image/rat-keyboard-anim.gif')] bg-cover bg-center text-center font-bold"
 >
